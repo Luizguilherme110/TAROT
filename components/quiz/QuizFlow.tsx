@@ -1,0 +1,77 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useQuiz } from '@/components/providers/QuizProvider';
+import { QUIZ_QUESTIONS } from '@/lib/quiz-questions';
+import { ProgressBar } from './ProgressBar';
+import { QuestionCard } from './QuestionCard';
+import { OpenTextStep } from './OpenTextStep';
+import { NameStep } from './NameStep';
+import { BirthDateStep } from './BirthDateStep';
+
+export function QuizFlow() {
+  const router = useRouter();
+  const { state, dispatch } = useQuiz();
+  const question = QUIZ_QUESTIONS[state.currentStep];
+
+  if (!question) {
+    router.push('/leitura/preparando');
+    return null;
+  }
+
+  function goNext() {
+    if (state.currentStep + 1 >= QUIZ_QUESTIONS.length) {
+      router.push('/leitura/preparando');
+    } else {
+      dispatch({ type: 'NEXT' });
+    }
+  }
+
+  return (
+    <div className="flex min-h-dvh flex-col items-center px-6 py-12 md:px-12">
+      <div className="w-full max-w-md">
+        <ProgressBar current={state.currentStep} total={QUIZ_QUESTIONS.length} />
+      </div>
+      <div className="flex w-full flex-1 items-center justify-center py-12">
+        {question.type === 'choice' && (
+          <QuestionCard
+            question={question}
+            value={state.answers[question.id]}
+            onAnswer={(optionId) => {
+              dispatch({ type: 'ANSWER', questionId: question.id, value: optionId });
+              goNext();
+            }}
+          />
+        )}
+        {question.type === 'open' && (
+          <OpenTextStep
+            question={question}
+            value={state.answers[question.id]}
+            onSubmit={(text) => {
+              dispatch({ type: 'ANSWER', questionId: question.id, value: text });
+              goNext();
+            }}
+          />
+        )}
+        {question.type === 'name' && (
+          <NameStep
+            value={state.name}
+            onSubmit={(name) => {
+              dispatch({ type: 'SET_NAME', value: name });
+              goNext();
+            }}
+          />
+        )}
+        {question.type === 'birthdate' && (
+          <BirthDateStep
+            value={state.birthDate}
+            onSubmit={(date) => {
+              dispatch({ type: 'SET_BIRTH_DATE', value: date });
+              goNext();
+            }}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
