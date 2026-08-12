@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, useReducedMotion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 
 const LINES = [
   'Respire fundo.',
@@ -12,8 +12,32 @@ const LINES = [
 
 export function RitualTransition() {
   const router = useRouter();
-  const reduce = useReducedMotion();
   const [step, setStep] = useState(0);
+
+  // Reduced-motion preference can't be known during SSR, and it can't be known on
+  // the very first client render either (that happens before this effect runs).
+  // Defaulting this to `false` (the more common "motion is fine" case) is what the
+  // original implementation did, and it caused a real, measurable bug: the server
+  // always renders the entrance-fade "hidden" style (opacity: 0), so reduced-motion
+  // users saw a genuine flash of invisible content on first paint, plus a React
+  // hydration-mismatch console error, while the correction caught up a tick later.
+  // Defaulting to `true` instead means the server and the first client render
+  // always agree on rendering the line fully visible with no animation, so there is
+  // nothing to flash and nothing to mismatch. The one-time trade-off: a
+  // non-reduced-motion user's very first line (step 0) also renders without its
+  // entrance fade, since by the time the effect confirms motion is fine, that first
+  // `motion.p` has already mounted and settled. Every later line swap (step 1, 2, ...)
+  // is a fresh mount with the effect's real value already resolved, so those animate
+  // normally for non-reduced-motion users.
+  const [reduce, setReduce] = useState(true);
+
+  useEffect(() => {
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduce(query.matches);
+    const handleChange = () => setReduce(query.matches);
+    query.addEventListener('change', handleChange);
+    return () => query.removeEventListener('change', handleChange);
+  }, []);
 
   function goToResult() {
     router.push('/leitura/resultado');
