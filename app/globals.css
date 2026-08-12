@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+@theme {
+  --color-ink-950: #09090b;
+  --color-ink-900: #131316;
+  --color-parchment-100: #f5f3ef;
+  --color-parchment-400: #a8a29e;
+  --color-gold-400: #d4a24e;
+  --color-gold-300: #e8b968;
+  --font-display: var(--font-outfit);
+  --font-body: var(--font-manrope);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
