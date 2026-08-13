@@ -17,7 +17,7 @@ export function QuizFlow() {
   const question = QUIZ_QUESTIONS[state.currentStep];
 
   if (!question) {
-    router.push('/leitura/preparando');
+    router.push('/leitura/carta');
     return null;
   }
 
@@ -26,7 +26,7 @@ export function QuizFlow() {
 
   function goNext() {
     if (state.currentStep + 1 >= QUIZ_QUESTIONS.length) {
-      router.push('/leitura/preparando');
+      router.push('/leitura/carta');
     } else {
       dispatch({ type: 'NEXT' });
     }
