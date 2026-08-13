@@ -42,4 +42,17 @@ describe('generateMockReport', () => {
     const report = generateMockReport(makeSession({ name: '' }));
     expect(report.opening.startsWith('você,')).toBe(true);
   });
+
+  it('includes a genie_intro with the situation mood and a trait line mentioning the name', () => {
+    const report = generateMockReport(
+      makeSession({ name: 'Ana', answers: { situacao_atual: 'dinheiro', elemento: 'terra' } }),
+    );
+    expect(report.genie_intro.mood).toBe('neutral');
+    expect(report.genie_intro.line).toContain('Ana');
+  });
+
+  it('falls back to the fase_nova trait for an unknown situation in genie_intro', () => {
+    const report = generateMockReport(makeSession({ answers: { situacao_atual: 'inexistente', elemento: 'ar' } }));
+    expect(report.genie_intro.line).toContain('virada de ciclo');
+  });
 });
