@@ -1,42 +1,19 @@
 'use client';
 
+import Image from 'next/image';
 import { motion, useReducedMotion } from 'motion/react';
 import type { GenieMood } from '@/lib/genie-lines';
 
-// Rendered as a CSS sprite: one shared sheet, windowed via
-// background-position, instead of five individually-cropped files.
-//
-// Two Chromium rendering quirks shaped this implementation, both
-// reproduced in isolation (plain static HTML, no Next.js/React):
-// 1. `sharp().extract()` output PNGs render with content missing in
-//    Chromium specifically, even after a clean re-encode - avoided
-//    entirely by never pre-cropping server side.
-// 2. A `background-position` window narrower than ~300px into this
-//    (1920x1280) sheet renders with roughly half the visible area
-//    blank, regardless of file format or scale - the window below
-//    stays at a safe native width and is scaled down afterward with
-//    `transform: scale()` (GPU compositing, not re-rasterized) rather
-//    than shrinking `background-size` directly.
-const SHEET_W = 1920;
-const SHEET_H = 1280;
-const CELL_W = 384;
-const CELL_H = 640;
-// Poses aren't perfectly confined to their cell (arms, hearts, sparkles
-// bleed into the neighboring column), so the window is inset from the
-// cell's left edge and narrower than a full cell.
-const WINDOW_INSET_LEFT = 15;
-const WINDOW_W = 310;
-
-const MOOD_CELL: Record<GenieMood, [col: number, row: number]> = {
-  neutral: [0, 0],
-  thinking: [1, 0],
-  pleased: [2, 0],
-  excited: [3, 0],
-  warm: [3, 1],
+const MOOD_IMAGE: Record<GenieMood, string> = {
+  neutral: '/images/genie/neutral.png',
+  thinking: '/images/genie/thinking.png',
+  pleased: '/images/genie/pleased.png',
+  excited: '/images/genie/excited.png',
+  warm: '/images/genie/warm.png',
 };
 
 // Target HEIGHT per size - the art is a tall, narrow portrait (turban to
-// lamp), so width follows automatically from the window's own ratio.
+// lamp), so width follows automatically from the image's own ratio.
 const SIZE_PX: Record<'sm' | 'md' | 'lg', number> = {
   sm: 88,
   md: 200,
@@ -51,52 +28,27 @@ type Props = {
 
 export function GenieAvatar({ mood, size = 'md', priority = false }: Props) {
   const reduce = useReducedMotion();
-  const displayHeight = SIZE_PX[size];
-  const scale = displayHeight / CELL_H;
-  const displayWidth = WINDOW_W * scale;
-  const [col, row] = MOOD_CELL[mood];
-  const x = col * CELL_W + WINDOW_INSET_LEFT;
-  const y = row * CELL_H;
+  const height = SIZE_PX[size];
 
   return (
-    <>
-      {priority ? <link rel="preload" as="image" href="/images/genie/sheet.webp" /> : null}
-      {/*
-        Three separate layers on purpose. An animating `transform` (the
-        bob) on the same element as `overflow: hidden` plus a child's own
-        static `transform: scale()` intermittently mis-composites in
-        Chromium - the clipped region goes blank on some animation
-        frames, not just the first paint, so a single reduced-motion
-        screenshot never catches it. Splitting "animate" (outer),
-        "clip to display size" (middle, static), and "scale the sprite
-        window" (inner, static) into different elements avoids the
-        conflict, since only the outer element's transform ever changes.
-      */}
-      <motion.div
-        animate={reduce ? undefined : { y: [0, -8, 0] }}
-        transition={reduce ? undefined : { duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        className="shrink-0"
-      >
-        <div
-          role="img"
-          aria-label="O gênio, seu guia na leitura"
-          className="relative overflow-hidden"
-          style={{ width: displayWidth, height: displayHeight }}
-        >
-          <div
-            className="bg-no-repeat"
-            style={{
-              width: WINDOW_W,
-              height: CELL_H,
-              backgroundImage: 'url(/images/genie/sheet.webp)',
-              backgroundSize: `${SHEET_W}px ${SHEET_H}px`,
-              backgroundPosition: `-${x}px -${y}px`,
-              transform: `scale(${scale})`,
-              transformOrigin: 'top left',
-            }}
-          />
-        </div>
-      </motion.div>
-    </>
+    // Bob animation lives on its own wrapper with nothing else on it - an
+    // earlier version combined an animating transform with a sibling clip
+    // + scale on the same/child element and intermittently mis-composited
+    // in Chromium (blank on some animation frames, not just first paint).
+    <motion.div
+      animate={reduce ? undefined : { y: [0, -8, 0] }}
+      transition={reduce ? undefined : { duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+      className="shrink-0"
+    >
+      <Image
+        key={mood}
+        src={MOOD_IMAGE[mood]}
+        alt="O gênio, seu guia na leitura"
+        width={294}
+        height={512}
+        priority={priority}
+        style={{ height, width: 'auto' }}
+      />
+    </motion.div>
   );
 }
