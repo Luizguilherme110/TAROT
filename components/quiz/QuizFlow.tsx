@@ -3,6 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useQuiz } from '@/components/providers/QuizProvider';
 import { QUIZ_QUESTIONS } from '@/lib/quiz-questions';
+import { getGenieReaction } from '@/lib/genie-lines';
+import { GenieCompanion } from '@/components/genie/GenieCompanion';
 import { ProgressBar } from './ProgressBar';
 import { QuestionCard } from './QuestionCard';
 import { OpenTextStep } from './OpenTextStep';
@@ -19,6 +21,9 @@ export function QuizFlow() {
     return null;
   }
 
+  const previousQuestion = QUIZ_QUESTIONS[state.currentStep - 1];
+  const genieReaction = getGenieReaction(previousQuestion, state.answers, state.name);
+
   function goNext() {
     if (state.currentStep + 1 >= QUIZ_QUESTIONS.length) {
       router.push('/leitura/preparando');
@@ -29,6 +34,7 @@ export function QuizFlow() {
 
   return (
     <div className="flex min-h-dvh flex-col items-center px-6 py-12 md:px-12">
+      <GenieCompanion mood={genieReaction.mood} line={genieReaction.line} />
       <div className="w-full max-w-md">
         <ProgressBar current={state.currentStep} total={QUIZ_QUESTIONS.length} />
       </div>
