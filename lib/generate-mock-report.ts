@@ -1,4 +1,5 @@
 import type { QuizSession, Report } from './report-types';
+import { GENIE_REACTIONS } from './genie-lines';
 
 const SITUATION_CONTENT: Record<
   string,
@@ -61,12 +62,21 @@ const ELEMENT_CONTENT: Record<string, string> = {
   ar: 'Ar é cabeça cheia de possibilidades. O desafio agora não é ter mais ideias, é escolher qual delas merece virar ação.',
 };
 
+const SITUATION_TRAIT: Record<string, string> = {
+  amor: 'alguém que sente fundo, mesmo quando custa admitir',
+  decisao: 'alguém que pensa bem antes de agir',
+  dinheiro: 'alguém que já enxerga os próprios padrões',
+  fase_nova: 'alguém em plena virada de ciclo',
+};
+
 const DEFAULT_SITUATION = SITUATION_CONTENT.fase_nova;
+const DEFAULT_TRAIT = SITUATION_TRAIT.fase_nova;
 const DEFAULT_ELEMENT = ELEMENT_CONTENT.agua;
 
 export function generateMockReport(session: QuizSession): Report {
   const name = session.name.trim() || 'você';
-  const situation = SITUATION_CONTENT[session.answers.situacao_atual] ?? DEFAULT_SITUATION;
+  const situationKey = session.answers.situacao_atual;
+  const situation = SITUATION_CONTENT[situationKey] ?? DEFAULT_SITUATION;
   const elementContent = ELEMENT_CONTENT[session.answers.elemento] ?? DEFAULT_ELEMENT;
   const excerpt =
     session.answers.sono?.trim() ||
@@ -82,5 +92,9 @@ export function generateMockReport(session: QuizSession): Report {
     personalized_teaser: `Existe algo nas suas respostas que chamou nossa atenção...\n\nVocê mencionou que "${excerpt}".\n\nIsso aparece de forma interessante quando cruzamos sua leitura atual com o que você está vivendo.\n\nE é justamente aqui que começa a parte mais importante da sua leitura.`,
     sections: [{ title: 'O que seu elemento revela', content: elementContent }],
     final_message: `Essa é só a primeira camada da sua leitura, ${name}. O que vem a seguir mostra pra onde tudo isso está te levando.`,
+    genie_intro: {
+      mood: GENIE_REACTIONS.situacao_atual[situationKey]?.mood ?? 'neutral',
+      line: `${name}, vejo que você é ${SITUATION_TRAIT[situationKey] ?? DEFAULT_TRAIT}.`,
+    },
   };
 }

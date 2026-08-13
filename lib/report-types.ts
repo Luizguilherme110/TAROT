@@ -1,3 +1,5 @@
+import type { GenieMood } from './genie-lines';
+
 export type Report = {
   title: string;
   opening: string;
@@ -7,6 +9,7 @@ export type Report = {
   personalized_teaser: string;
   sections: { title: string; content: string }[];
   final_message: string;
+  genie_intro: { mood: GenieMood; line: string };
 };
 
 export type QuizSession = {
