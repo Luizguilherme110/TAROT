@@ -3,22 +3,20 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
-import { Sparkle, CompassRose, ArrowsClockwise, Heart, Lightning, Star, Sun } from '@phosphor-icons/react';
-import { TAROT_CARDS, type TarotCardIcon } from '@/lib/tarot-cards';
+import { Sparkle } from '@phosphor-icons/react';
+import { TAROT_CARDS } from '@/lib/tarot-cards';
 import { GenieAvatar } from '@/components/genie/GenieAvatar';
-
-const ICONS: Record<TarotCardIcon, PhosphorIcon> = {
-  CompassRose,
-  ArrowsClockwise,
-  Heart,
-  Lightning,
-  Star,
-  Sun,
-};
+import { useQuiz } from '@/components/providers/QuizProvider';
+import { trackEvent } from '@/lib/analytics/track';
+import { CardFace } from './CardFace';
 
 export function CardPicker() {
   const router = useRouter();
+  const { dispatch } = useQuiz();
+
+  useEffect(() => {
+    trackEvent('card_picker_view');
+  }, []);
 
   // Reduced-motion preference can't be known during SSR, and it can't be known on
   // the very first client render either (that happens before this effect runs).
@@ -60,7 +58,11 @@ export function CardPicker() {
                 <button
                   key={card.id}
                   type="button"
-                  onClick={() => setSelectedId(card.id)}
+                  onClick={() => {
+                    setSelectedId(card.id);
+                    dispatch({ type: 'SET_CARD', cardId: card.id });
+                    trackEvent('card_picked', { cardId: card.id });
+                  }}
                   aria-label={`Escolher carta ${index + 1}`}
                   className="flex aspect-[3/4] items-center justify-center rounded-2xl border border-gold-400/30 bg-ink-900 transition-colors duration-200 hover:border-gold-400/60"
                 >
@@ -77,7 +79,7 @@ export function CardPicker() {
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="flex w-full max-w-sm flex-col items-center text-center"
           >
-            <RevealedCardIcon icon={selectedCard.icon} />
+            <CardFace icon={selectedCard.icon} />
             <h1 className="mt-4 font-display text-2xl text-parchment-100">{selectedCard.name}</h1>
             <p className="mt-3 leading-relaxed text-parchment-400">{selectedCard.meaning}</p>
             <div className="mt-8 flex items-center gap-4">
@@ -98,9 +100,4 @@ export function CardPicker() {
       </AnimatePresence>
     </div>
   );
-}
-
-function RevealedCardIcon({ icon }: { icon: TarotCardIcon }) {
-  const Icon = ICONS[icon];
-  return <Icon size={48} weight="light" className="text-gold-400" />;
 }

@@ -1,10 +1,12 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuiz } from '@/components/providers/QuizProvider';
 import { QUIZ_QUESTIONS } from '@/lib/quiz-questions';
 import { getGenieReaction } from '@/lib/genie-lines';
 import { GenieCompanion } from '@/components/genie/GenieCompanion';
+import { trackEvent } from '@/lib/analytics/track';
 import { ProgressBar } from './ProgressBar';
 import { QuestionCard } from './QuestionCard';
 import { OpenTextStep } from './OpenTextStep';
@@ -15,6 +17,11 @@ export function QuizFlow() {
   const router = useRouter();
   const { state, dispatch } = useQuiz();
   const question = QUIZ_QUESTIONS[state.currentStep];
+
+  useEffect(() => {
+    if (question) trackEvent('quiz_step_view', { step: state.currentStep, questionId: question.id });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fire once per question shown, not on every render
+  }, [question?.id]);
 
   if (!question) {
     router.push('/leitura/carta');

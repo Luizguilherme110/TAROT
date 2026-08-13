@@ -1,5 +1,6 @@
 import type { QuizSession, Report } from './report-types';
 import { GENIE_REACTIONS } from './genie-lines';
+import { TAROT_CARDS } from './tarot-cards';
 
 const SITUATION_CONTENT: Record<
   string,
@@ -82,6 +83,7 @@ export function generateMockReport(session: QuizSession): Report {
     session.answers.sono?.trim() ||
     session.answers.deixar_para_tras?.trim() ||
     'algo que ainda não coloquei em palavras';
+  const card = TAROT_CARDS.find((candidate) => candidate.id === session.cardId) ?? null;
 
   return {
     title: 'Sua Leitura de Hoje',
@@ -92,6 +94,7 @@ export function generateMockReport(session: QuizSession): Report {
     personalized_teaser: `Existe algo nas suas respostas que chamou nossa atenção...\n\nVocê mencionou que "${excerpt}".\n\nIsso aparece de forma interessante quando cruzamos sua leitura atual com o que você está vivendo.\n\nE é justamente aqui que começa a parte mais importante da sua leitura.`,
     sections: [{ title: 'O que seu elemento revela', content: elementContent }],
     final_message: `Essa é só a primeira camada da sua leitura, ${name}. O que vem a seguir mostra pra onde tudo isso está te levando.`,
+    card,
     genie_intro: {
       mood: GENIE_REACTIONS.situacao_atual[situationKey]?.mood ?? 'neutral',
       line: `${name}, vejo que você é ${SITUATION_TRAIT[situationKey] ?? DEFAULT_TRAIT}.`,

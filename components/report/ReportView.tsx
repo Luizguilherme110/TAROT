@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import type { Report } from '@/lib/report-types';
 import { GenieAvatar } from '@/components/genie/GenieAvatar';
+import { CardFace } from '@/components/cards/CardFace';
+import { FeedbackForm } from '@/components/feedback/FeedbackForm';
 import { TeaserBlock } from './TeaserBlock';
 import { LockedSection } from './LockedSection';
 import { PaywallCta } from './PaywallCta';
@@ -26,6 +28,12 @@ export function ReportView({ report }: { report: Report }) {
           sizes="(min-width: 768px) 42rem, 100vw"
           className="object-cover"
         />
+        {report.card && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-ink-950/60 text-center backdrop-blur-sm">
+            <CardFace icon={report.card.icon} size={40} />
+            <p className="font-display text-lg text-parchment-100">{report.card.name}</p>
+          </div>
+        )}
       </div>
 
       <TeaserBlock teaser={report.personalized_teaser} />
@@ -38,6 +46,7 @@ export function ReportView({ report }: { report: Report }) {
       <LockedSection title={report.sections[0]?.title ?? 'O que seu elemento revela'} />
 
       <PaywallCta />
+      <FeedbackForm />
     </article>
   );
 }

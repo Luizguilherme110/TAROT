@@ -1,4 +1,5 @@
 import type { GenieMood } from './genie-lines';
+import type { TarotCard } from './tarot-cards';
 
 export type Report = {
   title: string;
@@ -10,10 +11,12 @@ export type Report = {
   sections: { title: string; content: string }[];
   final_message: string;
   genie_intro: { mood: GenieMood; line: string };
+  card: TarotCard | null;
 };
 
 export type QuizSession = {
   name: string;
   birthDate: string;
   answers: Record<string, string>;
+  cardId?: string;
 };

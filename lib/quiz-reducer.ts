@@ -6,6 +6,7 @@ export type QuizAction =
   | { type: 'ANSWER'; questionId: string; value: string }
   | { type: 'SET_NAME'; value: string }
   | { type: 'SET_BIRTH_DATE'; value: string }
+  | { type: 'SET_CARD'; cardId: string }
   | { type: 'NEXT' }
   | { type: 'BACK' }
   | { type: 'HYDRATE'; state: QuizState };
@@ -25,6 +26,8 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
       return { ...state, name: action.value };
     case 'SET_BIRTH_DATE':
       return { ...state, birthDate: action.value };
+    case 'SET_CARD':
+      return { ...state, cardId: action.cardId };
     case 'NEXT':
       return { ...state, currentStep: state.currentStep + 1 };
     case 'BACK':
