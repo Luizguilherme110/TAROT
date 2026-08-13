@@ -1,4 +1,4 @@
-export type ChoiceOption = { id: string; label: string; emoji?: string };
+export type ChoiceOption = { id: string; label: string };
 
 export type QuizQuestion =
   | { id: string; type: 'choice'; prompt: string; options: ChoiceOption[] }
@@ -12,10 +12,10 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     type: 'choice',
     prompt: 'Qual dessas situações mais parece com o seu momento atual?',
     options: [
-      { id: 'amor', label: 'Estou vivendo algo intenso no amor', emoji: '❤️' },
-      { id: 'decisao', label: 'Estou confuso(a) sobre uma decisão', emoji: '💭' },
-      { id: 'dinheiro', label: 'Quero mudar minha situação financeira', emoji: '💰' },
-      { id: 'fase_nova', label: 'Sinto que estou entrando em uma nova fase', emoji: '🌙' },
+      { id: 'amor', label: 'Estou vivendo algo intenso no amor' },
+      { id: 'decisao', label: 'Estou confuso(a) sobre uma decisão' },
+      { id: 'dinheiro', label: 'Quero mudar minha situação financeira' },
+      { id: 'fase_nova', label: 'Sinto que estou entrando em uma nova fase' },
     ],
   },
   {
@@ -67,10 +67,10 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     type: 'choice',
     prompt: 'Qual elemento mais combina com o seu momento?',
     options: [
-      { id: 'fogo', label: 'Fogo, impulso pra agir', emoji: '🔥' },
-      { id: 'agua', label: 'Água, sensibilidade e emoção', emoji: '💧' },
-      { id: 'terra', label: 'Terra, precisando de estabilidade', emoji: '🌍' },
-      { id: 'ar', label: 'Ar, cabeça cheia de ideias', emoji: '🌬️' },
+      { id: 'fogo', label: 'Fogo, impulso pra agir' },
+      { id: 'agua', label: 'Água, sensibilidade e emoção' },
+      { id: 'terra', label: 'Terra, precisando de estabilidade' },
+      { id: 'ar', label: 'Ar, cabeça cheia de ideias' },
     ],
   },
   {

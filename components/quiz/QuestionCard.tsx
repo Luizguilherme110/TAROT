@@ -26,14 +26,13 @@ export function QuestionCard({ question, value, onAnswer }: Props) {
             type="button"
             onClick={() => onAnswer(option.id)}
             aria-pressed={value === option.id}
-            className={`flex items-center gap-3 rounded-2xl border px-5 py-4 text-left transition-colors duration-200 ${
+            className={`rounded-2xl border px-5 py-4 text-left transition-colors duration-200 ${
               value === option.id
                 ? 'border-gold-400 bg-gold-400/10 text-parchment-100'
                 : 'border-white/10 bg-ink-900 text-parchment-400 hover:border-white/20 hover:text-parchment-100'
             }`}
           >
-            {option.emoji ? <span className="text-xl">{option.emoji}</span> : null}
-            <span>{option.label}</span>
+            {option.label}
           </button>
         ))}
       </div>
