@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
 import { Sparkle, CompassRose, ArrowsClockwise, Heart, Lightning, Star, Sun } from '@phosphor-icons/react';
 import { TAROT_CARDS, type TarotCardIcon } from '@/lib/tarot-cards';
@@ -19,9 +19,26 @@ const ICONS: Record<TarotCardIcon, PhosphorIcon> = {
 
 export function CardPicker() {
   const router = useRouter();
-  const reduce = useReducedMotion();
+
+  // Reduced-motion preference can't be known during SSR, and it can't be known on
+  // the very first client render either (that happens before this effect runs).
+  // Defaulting to `true` (assume reduced motion) makes the server render and the
+  // client's first render agree on the static, fully-visible state, so there is
+  // nothing to flash and nothing to hydration-mismatch on. The effect below then
+  // corrects it to the real value post-hydration. See RitualTransition.tsx for the
+  // fuller writeup of this bug class, which this component previously reintroduced
+  // by calling motion/react's `useReducedMotion()` directly.
+  const [reduce, setReduce] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selectedCard = TAROT_CARDS.find((card) => card.id === selectedId);
+
+  useEffect(() => {
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduce(query.matches);
+    const handleChange = () => setReduce(query.matches);
+    query.addEventListener('change', handleChange);
+    return () => query.removeEventListener('change', handleChange);
+  }, []);
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center px-6 py-12 md:px-12">

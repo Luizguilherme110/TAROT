@@ -10,7 +10,7 @@ export type TarotCard = {
   genieReaction: GenieLine;
 };
 
-export const TAROT_CARDS: TarotCard[] = [
+export const TAROT_CARDS = [
   {
     id: 'louco',
     name: 'O Louco',
@@ -77,4 +77,4 @@ export const TAROT_CARDS: TarotCard[] = [
       line: 'O Sol! Essa carta é praticamente um abraço. Gostei dessa.',
     },
   },
-];
+] as const satisfies TarotCard[];

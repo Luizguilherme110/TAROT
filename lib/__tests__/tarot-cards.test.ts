@@ -22,8 +22,20 @@ describe('TAROT_CARDS', () => {
 
   it('has zero em-dash or en-dash in meaning or genie reaction text', () => {
     for (const card of TAROT_CARDS) {
+      expect(card.name).not.toMatch(/[—–]/);
       expect(card.meaning).not.toMatch(/[—–]/);
       expect(card.genieReaction.line).not.toMatch(/[—–]/);
     }
+  });
+
+  it('has a fixed order (louco, roda_fortuna, amantes, torre, estrela, sol)', () => {
+    expect(TAROT_CARDS.map((card) => card.id)).toEqual([
+      'louco',
+      'roda_fortuna',
+      'amantes',
+      'torre',
+      'estrela',
+      'sol',
+    ]);
   });
 });
