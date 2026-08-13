@@ -3,12 +3,16 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
+import { GenieAvatar } from '@/components/genie/GenieAvatar';
+import type { GenieMood } from '@/lib/genie-lines';
 
 const LINES = [
   'Respire fundo.',
   'Pense na pergunta que você mais gostaria de ver respondida neste momento.',
   'Quando estiver pronto(a), continue.',
 ];
+
+const MOODS: GenieMood[] = ['thinking', 'thinking', 'pleased'];
 
 export function RitualTransition() {
   const router = useRouter();
@@ -48,6 +52,7 @@ export function RitualTransition() {
       <p className="font-display text-sm uppercase tracking-[0.18em] text-gold-400">
         Antes de revelar sua leitura...
       </p>
+      <GenieAvatar mood={MOODS[step]} size="md" />
       <AnimatePresence mode="wait">
         <motion.p
           key={step}
