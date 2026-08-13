@@ -26,10 +26,10 @@ export function QuestionCard({ question, value, onAnswer }: Props) {
             type="button"
             onClick={() => onAnswer(option.id)}
             aria-pressed={value === option.id}
-            className={`rounded-2xl border px-5 py-4 text-left transition-colors duration-200 ${
+            className={`rounded-2xl border px-5 py-4 text-left transition-all duration-200 active:scale-[0.98] ${
               value === option.id
-                ? 'border-gold-400 bg-gold-400/10 text-parchment-100'
-                : 'border-white/10 bg-ink-900 text-parchment-400 hover:border-white/20 hover:text-parchment-100'
+                ? 'border-gold-400 bg-gold-400/10 text-parchment-100 shadow-[0_8px_24px_-12px_rgba(212,162,78,0.35)]'
+                : 'border-white/10 bg-ink-900 text-parchment-400 shadow-[0_4px_16px_-10px_rgba(0,0,0,0.5)] hover:border-gold-400/30 hover:text-parchment-100'
             }`}
           >
             {option.label}

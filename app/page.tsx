@@ -3,7 +3,7 @@ import { HowItWorks } from '@/components/landing/HowItWorks';
 import { TrustSection } from '@/components/landing/TrustSection';
 import { FinalCta } from '@/components/landing/FinalCta';
 import { RevealOnScroll } from '@/components/motion/RevealOnScroll';
-import { CelestialBackdrop } from '@/components/landing/CelestialBackdrop';
+import { CelestialBackdrop } from '@/components/motion/CelestialBackdrop';
 
 export default function LandingPage() {
   return (

@@ -1,5 +1,11 @@
 import { QuizProvider } from '@/components/providers/QuizProvider';
+import { CelestialBackdrop } from '@/components/motion/CelestialBackdrop';
 
 export default function LeituraLayout({ children }: { children: React.ReactNode }) {
-  return <QuizProvider>{children}</QuizProvider>;
+  return (
+    <>
+      <CelestialBackdrop />
+      <QuizProvider>{children}</QuizProvider>
+    </>
+  );
 }

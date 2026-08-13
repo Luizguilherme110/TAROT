@@ -33,12 +33,17 @@ export function QuizFlow() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col items-center px-6 py-12 md:px-12">
-      <GenieCompanion mood={genieReaction.mood} line={genieReaction.line} />
+    <div className="relative flex min-h-dvh flex-col items-center px-6 py-12 md:px-12">
       <div className="w-full max-w-md">
         <ProgressBar current={state.currentStep} total={QUIZ_QUESTIONS.length} />
       </div>
-      <div className="flex w-full flex-1 items-center justify-center py-12">
+      {/* Genie and question grouped into one centered block, instead of the
+          genie floating in a viewport corner disconnected from what it's
+          reacting to. */}
+      <div className="flex w-full flex-1 flex-col items-center justify-center gap-6 py-12">
+        <div className="w-full max-w-md">
+          <GenieCompanion mood={genieReaction.mood} line={genieReaction.line} />
+        </div>
         {question.type === 'choice' && (
           <QuestionCard
             question={question}
