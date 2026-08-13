@@ -13,8 +13,8 @@ const MOOD_IMAGE: Record<GenieMood, string> = {
 };
 
 const SIZE_PX: Record<'sm' | 'md' | 'lg', number> = {
-  sm: 56,
-  md: 120,
+  sm: 64,
+  md: 140,
   lg: 320,
 };
 
@@ -32,8 +32,8 @@ export function GenieAvatar({ mood, size = 'md', priority = false }: Props) {
     <motion.div
       animate={reduce ? undefined : { y: [0, -8, 0] }}
       transition={reduce ? undefined : { duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-      className="relative shrink-0 overflow-hidden rounded-full shadow-[inset_0_0_28px_14px_var(--color-ink-950)]"
-      style={{ width: pixels, height: pixels }}
+      className="relative aspect-[2/3] shrink-0"
+      style={{ width: pixels }}
     >
       <Image
         key={mood}
@@ -42,7 +42,7 @@ export function GenieAvatar({ mood, size = 'md', priority = false }: Props) {
         fill
         priority={priority}
         sizes={`${pixels}px`}
-        className="object-cover"
+        className="object-contain"
       />
     </motion.div>
   );
