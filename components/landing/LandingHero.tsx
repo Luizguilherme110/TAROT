@@ -21,7 +21,7 @@ export function LandingHero() {
           </Link>
         </div>
       </div>
-      <div className="relative mt-12 flex w-full max-w-full flex-col items-center gap-4 lg:mt-0 [&>div]:h-[min(320px,calc(100vw-3rem))]! [&>div]:w-[min(320px,calc(100vw-3rem))]!">
+      <div className="relative mt-12 flex w-full flex-col items-center gap-4 lg:mt-0">
         <GenieAvatar mood="neutral" size="lg" priority />
         <p className="max-w-[26ch] text-center font-display text-base text-parchment-400">
           Sou seu guia nessa leitura. Vamos começar?
