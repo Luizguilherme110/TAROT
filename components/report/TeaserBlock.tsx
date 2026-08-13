@@ -1,4 +1,4 @@
-export function TeaserBlock({ teaser, finalMessage }: { teaser: string; finalMessage: string }) {
+export function TeaserBlock({ teaser }: { teaser: string }) {
   return (
     <section className="mt-14 rounded-2xl border border-gold-400/30 bg-gold-400/5 p-8">
       {teaser.split('\n\n').map((paragraph, index) => (
@@ -6,7 +6,6 @@ export function TeaserBlock({ teaser, finalMessage }: { teaser: string; finalMes
           {paragraph}
         </p>
       ))}
-      <p className="mt-6 leading-relaxed text-parchment-400">{finalMessage}</p>
     </section>
   );
 }

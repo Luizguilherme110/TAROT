@@ -23,8 +23,8 @@ export function HowItWorks() {
           <span className="font-display text-4xl text-gold-400">03</span>
           <h3 className="mt-4 font-display text-xl text-parchment-100">Você recebe, na hora</h3>
           <p className="mt-2 max-w-[60ch] text-parchment-400">
-            Um relatório gratuito aparece na tela em minutos, com pontos fortes, pontos de atenção e um gancho pro
-            que vem a seguir.
+            Uma prévia da sua leitura aparece na tela em minutos, mostrando que ela é sua mesmo. O resto vem ao
+            desbloquear.
           </p>
         </div>
       </div>

@@ -28,7 +28,7 @@ export function PaywallCta() {
       >
         Desbloquear leitura completa
       </button>
-      <p className="mt-3 text-sm text-gold-400">R$ 15,90</p>
+      <p className="mt-3 text-sm text-gold-400">R$ 19,90</p>
       <p className="mt-1 text-xs text-parchment-400">O checkout chega na próxima etapa do projeto.</p>
     </section>
   );
