@@ -1,5 +1,5 @@
-import Image from 'next/image';
 import Link from 'next/link';
+import { GenieAvatar } from '@/components/genie/GenieAvatar';
 
 export function LandingHero() {
   return (
@@ -21,15 +21,11 @@ export function LandingHero() {
           </Link>
         </div>
       </div>
-      <div className="relative mt-12 aspect-[4/5] w-full overflow-hidden rounded-2xl lg:mt-0">
-        <Image
-          src="/images/hero-celestial.jpg"
-          alt="Ilustração mística de uma carta de tarot iluminada sob um céu estrelado"
-          fill
-          priority
-          sizes="(min-width: 1024px) 40vw, 90vw"
-          className="object-cover"
-        />
+      <div className="relative mt-12 flex flex-col items-center gap-4 lg:mt-0">
+        <GenieAvatar mood="neutral" size="lg" priority />
+        <p className="max-w-[26ch] text-center font-display text-base text-parchment-400">
+          Sou seu guia nessa leitura. Vamos começar?
+        </p>
       </div>
     </section>
   );
