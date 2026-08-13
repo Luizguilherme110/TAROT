@@ -61,26 +61,41 @@ export function GenieAvatar({ mood, size = 'md', priority = false }: Props) {
   return (
     <>
       {priority ? <link rel="preload" as="image" href="/images/genie/sheet.webp" /> : null}
+      {/*
+        Three separate layers on purpose. An animating `transform` (the
+        bob) on the same element as `overflow: hidden` plus a child's own
+        static `transform: scale()` intermittently mis-composites in
+        Chromium - the clipped region goes blank on some animation
+        frames, not just the first paint, so a single reduced-motion
+        screenshot never catches it. Splitting "animate" (outer),
+        "clip to display size" (middle, static), and "scale the sprite
+        window" (inner, static) into different elements avoids the
+        conflict, since only the outer element's transform ever changes.
+      */}
       <motion.div
         animate={reduce ? undefined : { y: [0, -8, 0] }}
         transition={reduce ? undefined : { duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        role="img"
-        aria-label="O gênio, seu guia na leitura"
-        className="relative shrink-0 overflow-hidden"
-        style={{ width: displayWidth, height: displayHeight }}
+        className="shrink-0"
       >
         <div
-          className="bg-no-repeat"
-          style={{
-            width: WINDOW_W,
-            height: CELL_H,
-            backgroundImage: 'url(/images/genie/sheet.webp)',
-            backgroundSize: `${SHEET_W}px ${SHEET_H}px`,
-            backgroundPosition: `-${x}px -${y}px`,
-            transform: `scale(${scale})`,
-            transformOrigin: 'top left',
-          }}
-        />
+          role="img"
+          aria-label="O gênio, seu guia na leitura"
+          className="relative overflow-hidden"
+          style={{ width: displayWidth, height: displayHeight }}
+        >
+          <div
+            className="bg-no-repeat"
+            style={{
+              width: WINDOW_W,
+              height: CELL_H,
+              backgroundImage: 'url(/images/genie/sheet.webp)',
+              backgroundSize: `${SHEET_W}px ${SHEET_H}px`,
+              backgroundPosition: `-${x}px -${y}px`,
+              transform: `scale(${scale})`,
+              transformOrigin: 'top left',
+            }}
+          />
+        </div>
       </motion.div>
     </>
   );
