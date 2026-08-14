@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Outfit, Manrope } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit', display: 'swap' });
@@ -15,6 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pt-BR" className={`${outfit.variable} ${manrope.variable}`}>
       <body className="min-h-dvh bg-ink-950 text-parchment-100 font-body antialiased">
         {children}
+        <Analytics />
       </body>
     </html>
   );
