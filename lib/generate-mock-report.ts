@@ -1,4 +1,4 @@
-import type { QuizSession, Report } from './report-types';
+import type { FullReport, QuizSession, Report } from './report-types';
 import { GENIE_REACTIONS } from './genie-lines';
 import { TAROT_CARDS } from './tarot-cards';
 
@@ -70,6 +70,59 @@ const SITUATION_TRAIT: Record<string, string> = {
   fase_nova: 'alguém em plena virada de ciclo',
 };
 
+const FULL_REPORT_CONTENT: Record<string, FullReport> = {
+  amor: {
+    months_ahead:
+      'Nos próximos meses, algo que estava travado no campo afetivo começa a se mover. Não espere uma virada de um dia pro outro: é mais um destravar aos poucos, na medida em que você parar de se antecipar ao que o outro vai sentir.',
+    love: 'Se você está numa relação, o convite é abrir uma conversa que vem adiando, mesmo com medo da resposta. Se está sozinho(a), o próximo vínculo que importa provavelmente não vai parecer com o que você imaginava — e é bom sinal.',
+    career_money:
+      'No campo profissional, sua tendência de carregar o emocional do trabalho pra casa (e vice-versa) pode custar uma oportunidade se não for observada agora.',
+    attention:
+      'Preste atenção em quantas vezes você diz "tá tudo bem" quando não está, especialmente perto de quem você mais confia.',
+    warning:
+      'Ponto de alerta: mágoas antigas não resolvidas tendem a aparecer disfarçadas de ciúme ou desconfiança num vínculo novo. Vale nomear a origem antes de reagir.',
+    final_message:
+      'Você já sabe sentir fundo. O que falta agora não é sentir mais, é confiar que o que você sente merece ser dito em voz alta.',
+  },
+  decisao: {
+    months_ahead:
+      'A decisão que você vem adiando não vai ficar mais clara com mais tempo de análise — ela vai ficar mais clara com uma ação pequena e reversível que te tire do "e se".',
+    love: 'Enquanto essa escolha estiver em aberto, vínculos ao seu redor podem sentir sua ausência mesmo com você presente. Vale avisar quem te importa que sua cabeça está ocupada, não distante.',
+    career_money:
+      'Financeiramente, essa indecisão tem um custo silencioso: oportunidades que exigem resposta rápida podem estar passando enquanto você pesa prós e contras pela enésima vez.',
+    attention:
+      'Observe quantas vezes você pede a opinião de outra pessoa antes de admitir, pra si mesmo(a), o que você já sabe que quer.',
+    warning:
+      'Ponto de alerta: existe uma diferença entre ser cauteloso(a) e usar a análise como desculpa pra não se comprometer com nada. Vale reconhecer em qual dos dois você está agora.',
+    final_message:
+      'Você não precisa ter certeza absoluta pra dar o próximo passo. Precisa só de coragem suficiente pra dar um passo que você possa corrigir depois.',
+  },
+  dinheiro: {
+    months_ahead:
+      'Os próximos meses pedem menos foco em "ganhar mais" e mais foco em entender pra onde o que você já ganha está indo. Uma revisão simples nos hábitos financeiros rende mais do que parece agora.',
+    love: 'Questões de dinheiro tendem a aparecer em conversas afetivas neste período — sejam suas ou de alguém próximo. Vale separar autoestima de saldo bancário antes que a mistura pese na relação.',
+    career_money:
+      'Uma oportunidade de renda extra ou mudança profissional pode surgir, mas só vai valer a pena se você já tiver clareza do padrão que quer romper, não só do valor que quer alcançar.',
+    attention: 'Preste atenção em decisões financeiras tomadas por impulso pra aliviar ansiedade — elas tendem a se repetir em ciclo.',
+    warning:
+      'Ponto de alerta: promessas de ganho fácil ou rápido merecem desconfiança redobrada neste momento, mesmo vindas de gente próxima.',
+    final_message:
+      'Você já enxerga os padrões que te atrapalham. A próxima camada é agir diferente uma única vez — o resto vem depois, por repetição.',
+  },
+  fase_nova: {
+    months_ahead:
+      'O fechamento de ciclo que você sente se confirma nos próximos meses, mas o começo do próximo não vai chegar anunciado — você vai precisar decidir dar o primeiro passo antes de sentir 100% de segurança.',
+    love: 'Vínculos que não acompanham essa mudança de fase tendem a se distanciar naturalmente, sem drama. Não force nenhum deles a continuar do jeito que estava.',
+    career_money:
+      'No campo profissional ou financeiro, essa é uma fase de plantar, não de colher. Decisões tomadas agora rendem resultado visível daqui a alguns meses, não imediatamente.',
+    attention: 'Observe o quanto você fica no "quase decidindo" — é aí que a energia mais se perde neste momento.',
+    warning:
+      'Ponto de alerta: recomeçar sozinho(a) assusta, mas esperar companhia pra dar o primeiro passo pode custar o momento certo de agir.',
+    final_message:
+      'Você já sabe se adaptar rápido quando decide de verdade. O que falta não é capacidade, é permissão pra começar antes de estar pronto(a).',
+  },
+};
+
 const DEFAULT_SITUATION = SITUATION_CONTENT.fase_nova;
 const DEFAULT_TRAIT = SITUATION_TRAIT.fase_nova;
 const DEFAULT_ELEMENT = ELEMENT_CONTENT.agua;
@@ -84,6 +137,7 @@ export function generateMockReport(session: QuizSession): Report {
     session.answers.deixar_para_tras?.trim() ||
     'algo que ainda não coloquei em palavras';
   const card = TAROT_CARDS.find((candidate) => candidate.id === session.cardId) ?? null;
+  const full = FULL_REPORT_CONTENT[situationKey] ?? FULL_REPORT_CONTENT.fase_nova;
 
   return {
     title: 'Sua Leitura de Hoje',
@@ -99,5 +153,6 @@ export function generateMockReport(session: QuizSession): Report {
       mood: GENIE_REACTIONS.situacao_atual[situationKey]?.mood ?? 'neutral',
       line: `${name}, vejo que você é ${SITUATION_TRAIT[situationKey] ?? DEFAULT_TRAIT}.`,
     },
+    full,
   };
 }

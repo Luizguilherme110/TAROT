@@ -1,4 +1,8 @@
+'use client';
+
 import { Check } from '@phosphor-icons/react/dist/ssr';
+import { getOrCreateSessionId, trackEvent } from '@/lib/analytics/track';
+import { buildCaktoCheckoutUrl } from '@/lib/cakto';
 
 const DELIVERABLES = [
   'Próximos meses',
@@ -10,6 +14,11 @@ const DELIVERABLES = [
 ];
 
 export function PaywallCta() {
+  function handleClick() {
+    trackEvent('paywall_checkout_click');
+    window.location.href = buildCaktoCheckoutUrl(getOrCreateSessionId());
+  }
+
   return (
     <section className="mt-10 rounded-2xl border border-white/10 bg-ink-900 p-8 text-center">
       <h2 className="font-display text-2xl text-parchment-100">Sua Leitura Completa</h2>
@@ -23,13 +32,12 @@ export function PaywallCta() {
       </ul>
       <button
         type="button"
-        disabled
-        className="mt-8 inline-flex items-center justify-center rounded-full bg-gold-400 px-8 py-4 font-display text-sm font-medium text-ink-950 opacity-60"
+        onClick={handleClick}
+        className="mt-8 inline-flex items-center justify-center rounded-full bg-gold-400 px-8 py-4 font-display text-sm font-medium text-ink-950 transition hover:bg-gold-300"
       >
         Desbloquear leitura completa
       </button>
       <p className="mt-3 text-sm text-gold-400">R$ 19,90</p>
-      <p className="mt-1 text-xs text-parchment-400">O checkout chega na próxima etapa do projeto.</p>
     </section>
   );
 }

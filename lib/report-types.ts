@@ -1,6 +1,15 @@
 import type { GenieMood } from './genie-lines';
 import type { TarotCard } from './tarot-cards';
 
+export type FullReport = {
+  months_ahead: string;
+  love: string;
+  career_money: string;
+  attention: string;
+  warning: string;
+  final_message: string;
+};
+
 export type Report = {
   title: string;
   opening: string;
@@ -12,6 +21,7 @@ export type Report = {
   final_message: string;
   genie_intro: { mood: GenieMood; line: string };
   card: TarotCard | null;
+  full: FullReport;
 };
 
 export type QuizSession = {

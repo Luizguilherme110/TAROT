@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import type { Report } from '@/lib/report-types';
 import { GenieAvatar } from '@/components/genie/GenieAvatar';
@@ -6,9 +9,20 @@ import { FeedbackForm } from '@/components/feedback/FeedbackForm';
 import { TeaserBlock } from './TeaserBlock';
 import { LockedSection } from './LockedSection';
 import { PaywallCta } from './PaywallCta';
+import { getOrCreateSessionId } from '@/lib/analytics/track';
 
 export function ReportView({ report }: { report: Report }) {
   const pointCount = report.strengths.length + report.tensions.length;
+  const [paid, setPaid] = useState(false);
+
+  useEffect(() => {
+    const sessionId = getOrCreateSessionId();
+    if (!sessionId) return;
+    fetch(`/api/payments/status?session_id=${sessionId}`)
+      .then((res) => res.json())
+      .then((data: { paid?: boolean }) => setPaid(Boolean(data.paid)))
+      .catch(() => {});
+  }, []);
 
   return (
     <article className="mx-auto max-w-2xl px-6 py-16 md:px-0">
@@ -16,7 +30,9 @@ export function ReportView({ report }: { report: Report }) {
         <GenieAvatar mood={report.genie_intro.mood} size="sm" priority />
         <p className="font-display text-lg leading-snug text-parchment-100">{report.genie_intro.line}</p>
       </div>
-      <p className="font-display text-sm uppercase tracking-[0.18em] text-gold-400">Prévia da sua leitura</p>
+      <p className="font-display text-sm uppercase tracking-[0.18em] text-gold-400">
+        {paid ? 'Sua leitura completa' : 'Prévia da sua leitura'}
+      </p>
       <h1 className="mt-4 font-display text-3xl leading-tight text-parchment-100 md:text-4xl">{report.title}</h1>
       <p className="mt-6 text-lg leading-relaxed text-parchment-400">{report.opening}</p>
 
@@ -38,15 +54,39 @@ export function ReportView({ report }: { report: Report }) {
 
       <TeaserBlock teaser={report.personalized_teaser} />
 
-      <LockedSection title="Seu momento atual" />
-      <LockedSection
-        title="Pontos fortes e pontos de atenção"
-        hint={`${pointCount} pontos identificados`}
-      />
-      <LockedSection title={report.sections[0]?.title ?? 'O que seu elemento revela'} />
+      {paid ? (
+        <>
+          <UnlockedSection title="Seu momento atual" content={report.current_moment} />
+          <UnlockedSection title="Próximos meses" content={report.full.months_ahead} />
+          <UnlockedSection title="Amor e relacionamentos" content={report.full.love} />
+          <UnlockedSection title="Carreira e dinheiro" content={report.full.career_money} />
+          <UnlockedSection title="O que merece sua atenção" content={report.full.attention} />
+          <UnlockedSection title="Possível ponto de alerta" content={report.full.warning} />
+          <UnlockedSection
+            title={report.sections[0]?.title ?? 'O que seu elemento revela'}
+            content={report.sections[0]?.content ?? ''}
+          />
+          <UnlockedSection title="Mensagem final" content={report.full.final_message} />
+        </>
+      ) : (
+        <>
+          <LockedSection title="Seu momento atual" />
+          <LockedSection title="Pontos fortes e pontos de atenção" hint={`${pointCount} pontos identificados`} />
+          <LockedSection title={report.sections[0]?.title ?? 'O que seu elemento revela'} />
+          <PaywallCta />
+        </>
+      )}
 
-      <PaywallCta />
       <FeedbackForm />
     </article>
+  );
+}
+
+function UnlockedSection({ title, content }: { title: string; content: string }) {
+  return (
+    <section className="mt-10 rounded-2xl border border-white/10 bg-ink-900 p-6">
+      <h2 className="font-display text-xl text-parchment-100">{title}</h2>
+      <p className="mt-3 leading-relaxed text-parchment-400">{content}</p>
+    </section>
   );
 }
