@@ -38,9 +38,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, skipped: true });
   }
 
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const sessionId = body.data?.utm_content;
-  if (!sessionId) {
-    return NextResponse.json({ error: 'missing session reference' }, { status: 400 });
+  if (!sessionId || !UUID_RE.test(sessionId)) {
+    // Cakto's dashboard "Testar" button sends a placeholder utm_content
+    // ("example"), not a real session id — nothing to reconcile, not an error.
+    return NextResponse.json({ ok: true, skipped: true });
   }
 
   const supabase = getSupabaseServiceClient();
