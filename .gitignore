@@ -7,3 +7,6 @@ out
 *.tsbuildinfo
 .claude/worktrees/
 test-results/
+
+.vercel
+.env*
