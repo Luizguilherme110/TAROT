@@ -10,12 +10,15 @@ export function LandingHero() {
           Uma leitura criada a partir das suas respostas.
         </h1>
         <p className="mt-6 max-w-[42ch] text-base leading-relaxed text-parchment-400">
-          Responda algumas perguntas sobre o seu momento. A partir delas, uma IA monta uma leitura simbólica só sua.
+          Conte um pouco sobre o seu momento.
+          <br />
+          Responda algumas perguntas sobre o que você está vivendo. A partir das suas respostas, uma IA cria uma
+          leitura simbólica personalizada, feita especialmente para você.
         </p>
         <div className="mt-8 flex flex-wrap gap-4">
           <Link
             href="/leitura"
-            className="inline-flex items-center justify-center rounded-full bg-gold-400 px-8 py-4 font-display text-sm font-medium text-ink-950 transition-transform duration-300 ease-out hover:-translate-y-0.5 hover:bg-gold-300 active:translate-y-0 active:scale-[0.98]"
+            className="animate-glow-pulse inline-flex items-center justify-center rounded-full bg-gold-400 px-8 py-4 font-display text-sm font-medium text-ink-950 transition-transform duration-300 ease-out hover:-translate-y-0.5 hover:bg-gold-300 active:translate-y-0 active:scale-[0.98]"
           >
             Descobrir minha leitura
           </Link>
