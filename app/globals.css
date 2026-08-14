@@ -3,12 +3,25 @@
 @theme {
   --color-ink-950: #09090b;
   --color-ink-900: #131316;
+  --color-ink-800: #1c1c21;
   --color-parchment-100: #f5f3ef;
   --color-parchment-400: #a8a29e;
+  --color-gold-500: #b8863c;
   --color-gold-400: #d4a24e;
   --color-gold-300: #e8b968;
   --font-display: var(--font-outfit);
   --font-body: var(--font-manrope);
+  --shadow-panel: 0 20px 50px -12px rgb(9 9 11 / 0.55);
+  --shadow-gold: 0 12px 40px -8px rgb(212 162 78 / 0.25);
+}
+
+@keyframes loading-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
