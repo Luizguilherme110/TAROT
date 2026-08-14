@@ -35,3 +35,32 @@ export async function getRecentFeedback(): Promise<FeedbackRow[]> {
   if (error || !data) return [];
   return data as FeedbackRow[];
 }
+
+export type PaymentRow = {
+  session_id: string;
+  amount_cents: number | null;
+  cakto_order_id: string | null;
+  paid_at: string | null;
+};
+
+export async function getRecentPayments(): Promise<PaymentRow[]> {
+  const supabase = getSupabaseServiceClient();
+  const { data, error } = await supabase
+    .from('payments')
+    .select('session_id, amount_cents, cakto_order_id, paid_at')
+    .eq('status', 'paid')
+    .order('paid_at', { ascending: false })
+    .limit(50);
+  if (error || !data) return [];
+  return data as PaymentRow[];
+}
+
+export async function getPaidCount(): Promise<number> {
+  const supabase = getSupabaseServiceClient();
+  const { count, error } = await supabase
+    .from('payments')
+    .select('session_id', { count: 'exact', head: true })
+    .eq('status', 'paid');
+  if (error) return 0;
+  return count ?? 0;
+}

@@ -1,12 +1,19 @@
-import { Star } from '@phosphor-icons/react/dist/ssr';
-import { getFunnelCounts, getRecentFeedback } from '@/lib/admin-metrics';
+import { Star, CurrencyDollar } from '@phosphor-icons/react/dist/ssr';
+import { getFunnelCounts, getRecentFeedback, getRecentPayments, getPaidCount } from '@/lib/admin-metrics';
 import { LogoutButton } from '@/components/admin/LogoutButton';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminPage() {
-  const [funnel, feedback] = await Promise.all([getFunnelCounts(), getRecentFeedback()]);
+  const [funnel, feedback, payments, paidCount] = await Promise.all([
+    getFunnelCounts(),
+    getRecentFeedback(),
+    getRecentPayments(),
+    getPaidCount(),
+  ]);
   const top = funnel[0]?.count ?? 0;
+  const funnelWithPayments = [...funnel, { event: 'paid', label: 'Comprou a leitura completa', count: paidCount }];
+  const revenueCents = payments.reduce((sum, row) => sum + (row.amount_cents ?? 0), 0);
 
   return (
     <div className="min-h-dvh bg-ink-950 px-6 py-12 md:px-12">
@@ -18,8 +25,8 @@ export default async function AdminPage() {
       <section className="mx-auto mt-10 max-w-4xl">
         <h2 className="font-display text-sm uppercase tracking-[0.18em] text-gold-400">Funil</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {funnel.map((step, index) => {
-            const previous = funnel[index - 1]?.count ?? step.count;
+          {funnelWithPayments.map((step, index) => {
+            const previous = funnelWithPayments[index - 1]?.count ?? step.count;
             const stepConversion = previous > 0 ? Math.round((step.count / previous) * 100) : 100;
             const penetration = top > 0 ? Math.round((step.count / top) * 100) : 0;
             return (
@@ -34,6 +41,44 @@ export default async function AdminPage() {
             );
           })}
         </div>
+      </section>
+
+      <section className="mx-auto mt-12 max-w-4xl">
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-sm uppercase tracking-[0.18em] text-gold-400">
+            Pagamentos ({payments.length})
+          </h2>
+          <p className="flex items-center gap-1 font-display text-lg text-gold-400">
+            <CurrencyDollar size={18} weight="bold" />
+            {(revenueCents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+          </p>
+        </div>
+        {payments.length === 0 ? (
+          <p className="mt-4 text-sm text-parchment-400">Nenhum pagamento ainda.</p>
+        ) : (
+          <div className="mt-4 divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10 bg-ink-900">
+            {payments.map((row) => (
+              <div key={row.session_id} className="flex items-center justify-between gap-4 p-4">
+                <div className="min-w-0">
+                  <p className="truncate font-mono text-xs text-parchment-400">{row.session_id}</p>
+                  {row.cakto_order_id && (
+                    <p className="mt-0.5 truncate text-xs text-parchment-400/70">Pedido {row.cakto_order_id}</p>
+                  )}
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="font-display text-sm text-gold-400">
+                    {row.amount_cents != null
+                      ? (row.amount_cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                      : '-'}
+                  </p>
+                  <p className="text-xs text-parchment-400">
+                    {row.paid_at ? new Date(row.paid_at).toLocaleString('pt-BR') : '-'}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="mx-auto mt-12 max-w-4xl pb-16">

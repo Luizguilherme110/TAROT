@@ -1,6 +1,25 @@
 import type { GenieLine } from './genie-lines';
+import type { CardPosition } from './report-types';
 
 export type TarotCardIcon = 'CompassRose' | 'ArrowsClockwise' | 'Heart' | 'Lightning' | 'Star' | 'Sun';
+
+export const CARD_POSITIONS: CardPosition[] = ['passado', 'presente', 'futuro'];
+
+export const POSITION_LABEL: Record<CardPosition, string> = {
+  passado: 'Passado',
+  presente: 'Presente',
+  futuro: 'Futuro',
+};
+
+export const POSITION_FRAMING: Record<CardPosition, string> = {
+  passado: 'O que ficou no seu Passado ainda ecoa em como você chega até aqui.',
+  presente: 'No seu Presente, é isso que está mais vivo agora.',
+  futuro: 'O que vem no seu Futuro começa a se desenhar a partir de onde você está.',
+};
+
+export function buildPositionReading(position: CardPosition, cardMeaning: string): string {
+  return `${POSITION_FRAMING[position]} ${cardMeaning}`;
+}
 
 export type TarotCard = {
   id: string;

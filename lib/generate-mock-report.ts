@@ -1,6 +1,6 @@
-import type { FullReport, QuizSession, Report } from './report-types';
+import type { FullReport, QuizSession, Report, SpreadCard } from './report-types';
 import { GENIE_REACTIONS } from './genie-lines';
-import { TAROT_CARDS } from './tarot-cards';
+import { CARD_POSITIONS, TAROT_CARDS, buildPositionReading } from './tarot-cards';
 
 const SITUATION_CONTENT: Record<
   string,
@@ -136,7 +136,13 @@ export function generateMockReport(session: QuizSession): Report {
     session.answers.sono?.trim() ||
     session.answers.deixar_para_tras?.trim() ||
     'algo que ainda não coloquei em palavras';
-  const card = TAROT_CARDS.find((candidate) => candidate.id === session.cardId) ?? null;
+  const cardIds = session.cardIds ?? [];
+  const spread: SpreadCard[] = CARD_POSITIONS.reduce<SpreadCard[]>((acc, position, index) => {
+    const card = TAROT_CARDS.find((candidate) => candidate.id === cardIds[index]);
+    if (!card) return acc;
+    acc.push({ position, card, reading: buildPositionReading(position, card.meaning) });
+    return acc;
+  }, []);
   const full = FULL_REPORT_CONTENT[situationKey] ?? FULL_REPORT_CONTENT.fase_nova;
 
   return {
@@ -148,7 +154,7 @@ export function generateMockReport(session: QuizSession): Report {
     personalized_teaser: `Existe algo nas suas respostas que chamou nossa atenção...\n\nVocê mencionou que "${excerpt}".\n\nIsso aparece de forma interessante quando cruzamos sua leitura atual com o que você está vivendo.\n\nE é justamente aqui que começa a parte mais importante da sua leitura.`,
     sections: [{ title: 'O que seu elemento revela', content: elementContent }],
     final_message: `Essa é só a primeira camada da sua leitura, ${name}. O que vem a seguir mostra pra onde tudo isso está te levando.`,
-    card,
+    spread,
     genie_intro: {
       mood: GENIE_REACTIONS.situacao_atual[situationKey]?.mood ?? 'neutral',
       line: `${name}, vejo que você é ${SITUATION_TRAIT[situationKey] ?? DEFAULT_TRAIT}.`,

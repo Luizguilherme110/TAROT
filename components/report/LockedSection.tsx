@@ -5,12 +5,15 @@ const PLACEHOLDER_LINES = [
   'Um padrão que se repete há mais tempo do que parece, esperando ser nomeado.',
 ];
 
+// A row inside the consolidated "locked" panel in ReportView, not its own boxed
+// card - three near-identical bordered boxes stacked in a row read as filler,
+// one panel with internal rhythm reads as a single considered block.
 export function LockedSection({ title, hint }: { title: string; hint?: string }) {
   return (
-    <section className="relative mt-10 overflow-hidden rounded-2xl border border-white/10 bg-ink-900 p-6">
+    <div className="p-6">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="font-display text-xl text-parchment-100">{title}</h2>
-        <LockSimple size={18} weight="bold" className="shrink-0 text-gold-400" />
+        <h3 className="font-display text-lg text-parchment-100">{title}</h3>
+        <LockSimple size={16} weight="bold" className="shrink-0 text-gold-400" />
       </div>
       {hint ? <p className="mt-1 text-xs text-gold-400">{hint}</p> : null}
       <div aria-hidden="true" className="mt-3 select-none space-y-2 blur-[6px]">
@@ -20,6 +23,6 @@ export function LockedSection({ title, hint }: { title: string; hint?: string })
           </p>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

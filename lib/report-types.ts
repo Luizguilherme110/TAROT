@@ -1,6 +1,14 @@
 import type { GenieMood } from './genie-lines';
 import type { TarotCard } from './tarot-cards';
 
+export type CardPosition = 'passado' | 'presente' | 'futuro';
+
+export type SpreadCard = {
+  position: CardPosition;
+  card: TarotCard;
+  reading: string;
+};
+
 export type FullReport = {
   months_ahead: string;
   love: string;
@@ -20,7 +28,7 @@ export type Report = {
   sections: { title: string; content: string }[];
   final_message: string;
   genie_intro: { mood: GenieMood; line: string };
-  card: TarotCard | null;
+  spread: SpreadCard[];
   full: FullReport;
 };
 
@@ -28,5 +36,5 @@ export type QuizSession = {
   name: string;
   birthDate: string;
   answers: Record<string, string>;
-  cardId?: string;
+  cardIds?: string[];
 };
