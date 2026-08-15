@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { QUIZ_QUESTIONS } from '../quiz-questions';
+import { QUIZ_QUESTION_POOL as QUIZ_QUESTIONS } from '../quiz-questions';
 import {
   GENIE_REACTIONS,
   GENIE_OPEN_TEXT_REACTION,

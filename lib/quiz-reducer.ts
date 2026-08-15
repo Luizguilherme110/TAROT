@@ -1,6 +1,6 @@
 import type { QuizSession } from './report-types';
 
-export type QuizState = QuizSession & { currentStep: number };
+export type QuizState = QuizSession & { currentStep: number; questionOrder: string[] };
 
 export type QuizAction =
   | { type: 'ANSWER'; questionId: string; value: string }
@@ -9,6 +9,7 @@ export type QuizAction =
   | { type: 'ADD_CARD'; cardId: string }
   | { type: 'NEXT' }
   | { type: 'BACK' }
+  | { type: 'INIT_SESSION'; questionOrder: string[] }
   | { type: 'HYDRATE'; state: QuizState };
 
 export const initialQuizState: QuizState = {
@@ -16,6 +17,7 @@ export const initialQuizState: QuizState = {
   birthDate: '',
   answers: {},
   currentStep: 0,
+  questionOrder: [],
 };
 
 export function quizReducer(state: QuizState, action: QuizAction): QuizState {
@@ -32,6 +34,8 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
       return { ...state, currentStep: state.currentStep + 1 };
     case 'BACK':
       return { ...state, currentStep: Math.max(0, state.currentStep - 1) };
+    case 'INIT_SESSION':
+      return state.questionOrder.length > 0 ? state : { ...state, questionOrder: action.questionOrder };
     case 'HYDRATE':
       return action.state;
     default:

@@ -1,5 +1,6 @@
 import type { FullReport, QuizSession, Report, SpreadCard } from './report-types';
 import { GENIE_REACTIONS } from './genie-lines';
+import { OPEN_POOL } from './quiz-questions';
 import { CARD_POSITIONS, TAROT_CARDS, buildPositionReading } from './tarot-cards';
 
 const SITUATION_CONTENT: Record<
@@ -133,8 +134,7 @@ export function generateMockReport(session: QuizSession): Report {
   const situation = SITUATION_CONTENT[situationKey] ?? DEFAULT_SITUATION;
   const elementContent = ELEMENT_CONTENT[session.answers.elemento] ?? DEFAULT_ELEMENT;
   const excerpt =
-    session.answers.sono?.trim() ||
-    session.answers.deixar_para_tras?.trim() ||
+    OPEN_POOL.map((question) => session.answers[question.id]?.trim()).find(Boolean) ??
     'algo que ainda não coloquei em palavras';
   const cardIds = session.cardIds ?? [];
   const spread: SpreadCard[] = CARD_POSITIONS.reduce<SpreadCard[]>((acc, position, index) => {

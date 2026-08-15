@@ -28,8 +28,25 @@ describe('quizReducer', () => {
   });
 
   it('replaces the whole state on HYDRATE', () => {
-    const hydrated = { name: 'Ana', birthDate: '2000-01-01', answers: { a: '1' }, currentStep: 3 };
+    const hydrated = {
+      name: 'Ana',
+      birthDate: '2000-01-01',
+      answers: { a: '1' },
+      currentStep: 3,
+      questionOrder: ['a', 'b'],
+    };
     const next = quizReducer(initialQuizState, { type: 'HYDRATE', state: hydrated });
     expect(next).toEqual(hydrated);
+  });
+
+  it('sets questionOrder on INIT_SESSION when empty', () => {
+    const next = quizReducer(initialQuizState, { type: 'INIT_SESSION', questionOrder: ['a', 'b', 'c'] });
+    expect(next.questionOrder).toEqual(['a', 'b', 'c']);
+  });
+
+  it('ignores INIT_SESSION when a questionOrder already exists', () => {
+    const withOrder = { ...initialQuizState, questionOrder: ['x', 'y'] };
+    const next = quizReducer(withOrder, { type: 'INIT_SESSION', questionOrder: ['a', 'b', 'c'] });
+    expect(next.questionOrder).toEqual(['x', 'y']);
   });
 });
