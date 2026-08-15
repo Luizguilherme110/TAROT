@@ -72,8 +72,8 @@ export function ReportView({ report }: { report: Report }) {
         </div>
       ) : (
         <>
+          <UnlockedSection title="Seu momento atual" content={report.current_moment} />
           <div className="mt-4 divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10 bg-ink-900 shadow-panel">
-            <LockedSection title="Seu momento atual" />
             <LockedSection title="Pontos fortes e pontos de atenção" hint={`${pointCount} pontos identificados`} />
             <LockedSection title="Próximos meses" />
             <LockedSection title="Amor e relacionamentos" />
