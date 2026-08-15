@@ -40,6 +40,10 @@ export function PaywallCta() {
           Desbloquear leitura completa
         </button>
         <p className="mt-3 font-display text-lg text-gold-400">R$ 19,90</p>
+        <p className="mt-2 text-xs leading-snug text-parchment-400">
+          Essa leitura foi montada a partir do seu momento atual. Quanto mais tempo passa, menos ela reflete onde
+          você está agora.
+        </p>
       </div>
     </section>
   );
