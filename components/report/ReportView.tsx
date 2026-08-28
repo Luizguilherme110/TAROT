@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { motion, useReducedMotion } from 'motion/react';
 import type { Report } from '@/lib/report-types';
@@ -11,22 +10,13 @@ import { FeedbackForm } from '@/components/feedback/FeedbackForm';
 import { TeaserBlock } from './TeaserBlock';
 import { LockedSection } from './LockedSection';
 import { PaywallCta } from './PaywallCta';
-import { getOrCreateSessionId } from '@/lib/analytics/track';
+import { usePaymentStatus } from './usePaymentStatus';
 
 export function ReportView({ report }: { report: Report }) {
   const pointCount = report.strengths.length + report.tensions.length;
-  const [paid, setPaid] = useState(false);
+  const paid = usePaymentStatus();
   const presenteCard = report.spread.find((entry) => entry.position === 'presente');
   const futuroCard = report.spread.find((entry) => entry.position === 'futuro');
-
-  useEffect(() => {
-    const sessionId = getOrCreateSessionId();
-    if (!sessionId) return;
-    fetch(`/api/payments/status?session_id=${sessionId}`)
-      .then((res) => res.json())
-      .then((data: { paid?: boolean }) => setPaid(Boolean(data.paid)))
-      .catch(() => {});
-  }, []);
 
   return (
     <article className="mx-auto max-w-2xl px-6 py-16 md:px-0">

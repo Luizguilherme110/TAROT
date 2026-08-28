@@ -34,7 +34,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'invalid secret' }, { status: 401 });
   }
 
-  if (body.event !== 'purchase_approved') {
+  // A refund or chargeback has to walk the access back, otherwise a reader who
+  // got their money back keeps the unlocked report forever. `payments/status`
+  // only ever grants access on the exact string 'paid', so writing anything
+  // else here is enough to re-lock the report on the next poll.
+  const REVOKE_EVENTS = new Set(['refund', 'refunded', 'chargeback', 'purchase_refunded']);
+  const isApproval = body.event === 'purchase_approved';
+  const isRevocation = typeof body.event === 'string' && REVOKE_EVENTS.has(body.event);
+
+  if (!isApproval && !isRevocation) {
     return NextResponse.json({ ok: true, skipped: true });
   }
 
@@ -50,10 +58,12 @@ export async function POST(request: Request) {
   const { error } = await supabase.from('payments').upsert(
     {
       session_id: sessionId,
-      status: 'paid',
+      status: isApproval ? 'paid' : 'refunded',
       cakto_order_id: body.data?.id ?? body.data?.refId ?? null,
       amount_cents: body.data?.amount ? Math.round(body.data.amount * 100) : null,
-      paid_at: body.data?.paidAt ?? new Date().toISOString(),
+      // Keep paid_at meaning "when this was approved" — a revocation must not
+      // stamp it with the refund time.
+      paid_at: isApproval ? (body.data?.paidAt ?? new Date().toISOString()) : null,
     },
     { onConflict: 'session_id' },
   );

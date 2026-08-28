@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useReducer, useState, type Dispatch, type ReactNode } from 'react';
 import { quizReducer, initialQuizState, type QuizState, type QuizAction } from '@/lib/quiz-reducer';
+import { browserStorage, readPersisted, writePersisted } from '@/lib/persistent-storage';
 
 const STORAGE_KEY = 'tarot_quiz_session_v1';
 
@@ -18,7 +19,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
   // server/client markup mismatch. Once mounted, read any stored session and
   // dispatch it in, producing a second client-only render/commit.
   useEffect(() => {
-    const stored = window.sessionStorage.getItem(STORAGE_KEY);
+    const stored = readPersisted(STORAGE_KEY, browserStorage('local'), browserStorage('session'));
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as QuizState;
@@ -30,13 +31,13 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     setHasHydrated(true);
   }, []);
 
-  // Mirrors state to sessionStorage on every change, but only after the hydration
+  // Mirrors state to localStorage on every change, but only after the hydration
   // read above has run. Without this gate, this effect would fire on the initial
   // mount with `state === initialQuizState` (before HYDRATE's dispatch has been
   // committed) and clobber any real in-progress session with the initial state.
   useEffect(() => {
     if (!hasHydrated) return;
-    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    writePersisted(STORAGE_KEY, JSON.stringify(state), browserStorage('local'));
   }, [state, hasHydrated]);
 
   return <QuizContext.Provider value={{ state, dispatch }}>{children}</QuizContext.Provider>;

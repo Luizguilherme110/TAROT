@@ -16,7 +16,16 @@ const DELIVERABLES = [
 export function PaywallCta() {
   function handleClick() {
     trackEvent('paywall_checkout_click');
-    window.location.href = buildCaktoCheckoutUrl(getOrCreateSessionId());
+    const url = buildCaktoCheckoutUrl(getOrCreateSessionId());
+
+    // Open the checkout beside the report rather than navigating away from it.
+    // The report tab stays mounted and polling, so switching back after paying
+    // unlocks it on the focus re-check — no dependence on Cakto being
+    // configured to redirect, and no reliance on the reader pressing Back.
+    // Popup blockers allow this because it runs inside a click handler; if one
+    // still refuses, fall back to navigating in place.
+    const tab = window.open(url, '_blank', 'noopener,noreferrer');
+    if (!tab) window.location.href = url;
   }
 
   return (
