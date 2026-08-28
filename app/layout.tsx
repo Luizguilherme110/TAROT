@@ -4,6 +4,7 @@ import { Outfit, Manrope } from 'next/font/google';
 import './globals.css';
 import { META_PIXEL_IDS, metaPixelSnippet } from '@/lib/analytics/meta-pixel';
 import { UTMIFY_PIXEL_ID, UTMIFY_PIXEL_SCRIPT_URL } from '@/lib/analytics/utmify-pixel';
+import { claritySnippet } from '@/lib/analytics/clarity';
 
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit', display: 'swap' });
 const manrope = Manrope({ subsets: ['latin'], variable: '--font-manrope', display: 'swap' });
@@ -24,6 +25,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {`window.pixelId = "${UTMIFY_PIXEL_ID}";`}
         </Script>
         <Script src={UTMIFY_PIXEL_SCRIPT_URL} strategy="afterInteractive" async defer />
+        <Script id="clarity" strategy="afterInteractive">
+          {claritySnippet}
+        </Script>
         <noscript>
           {META_PIXEL_IDS.map((id) => (
             // eslint-disable-next-line @next/next/no-img-element
