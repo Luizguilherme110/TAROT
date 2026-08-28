@@ -7,6 +7,7 @@ import { buildQuizSessionOrder, getQuestionById } from '@/lib/quiz-questions';
 import { getGenieReaction } from '@/lib/genie-lines';
 import { GenieCompanion } from '@/components/genie/GenieCompanion';
 import { trackEvent } from '@/lib/analytics/track';
+import { saveQuizAnswer } from '@/lib/analytics/quiz-answers';
 import { ProgressBar } from './ProgressBar';
 import { QuestionCard } from './QuestionCard';
 import { OpenTextStep } from './OpenTextStep';
@@ -67,6 +68,7 @@ export function QuizFlow() {
             value={state.answers[question.id]}
             onAnswer={(optionId) => {
               dispatch({ type: 'ANSWER', questionId: question.id, value: optionId });
+              saveQuizAnswer(question.id, 'choice', optionId);
               goNext();
             }}
           />
@@ -77,6 +79,7 @@ export function QuizFlow() {
             value={state.answers[question.id]}
             onSubmit={(text) => {
               dispatch({ type: 'ANSWER', questionId: question.id, value: text });
+              saveQuizAnswer(question.id, 'open', text);
               goNext();
             }}
           />

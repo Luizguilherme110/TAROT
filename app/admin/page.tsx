@@ -1,15 +1,24 @@
 import { Star, CurrencyDollar } from '@phosphor-icons/react/dist/ssr';
-import { getFunnelCounts, getRecentFeedback, getRecentPayments, getPaidCount } from '@/lib/admin-metrics';
+import {
+  getFunnelCounts,
+  getRecentFeedback,
+  getRecentPayments,
+  getPaidCount,
+  getOpenAnswers,
+  getChoiceBreakdown,
+} from '@/lib/admin-metrics';
 import { LogoutButton } from '@/components/admin/LogoutButton';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminPage() {
-  const [funnel, feedback, payments, paidCount] = await Promise.all([
+  const [funnel, feedback, payments, paidCount, openAnswers, choices] = await Promise.all([
     getFunnelCounts(),
     getRecentFeedback(),
     getRecentPayments(),
     getPaidCount(),
+    getOpenAnswers(),
+    getChoiceBreakdown(),
   ]);
   const top = funnel[0]?.count ?? 0;
   const funnelWithPayments = [...funnel, { event: 'paid', label: 'Comprou a leitura completa', count: paidCount }];
@@ -74,6 +83,67 @@ export default async function AdminPage() {
                   <p className="text-xs text-parchment-400">
                     {row.paid_at ? new Date(row.paid_at).toLocaleString('pt-BR') : '-'}
                   </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* The reader's own sentences, which is what ad copy gets written from —
+          so this sits above the aggregates rather than below them. */}
+      <section className="mx-auto mt-12 max-w-4xl">
+        <h2 className="font-display text-sm uppercase tracking-[0.18em] text-gold-400">
+          O que escreveram ({openAnswers.length})
+        </h2>
+        {openAnswers.length === 0 ? (
+          <p className="mt-4 text-sm text-parchment-400">
+            Nenhuma resposta escrita ainda. Elas aparecem aqui assim que alguém responder o quiz.
+          </p>
+        ) : (
+          <div className="mt-4 flex flex-col gap-3">
+            {openAnswers.map((row, index) => (
+              <div key={index} className="rounded-2xl border border-white/10 bg-ink-900 p-5">
+                <p className="text-xs leading-snug text-parchment-400">{row.prompt}</p>
+                <p className="mt-2 leading-relaxed text-parchment-100">&ldquo;{row.answer}&rdquo;</p>
+                <p className="mt-3 text-xs text-parchment-400/70">
+                  {new Date(row.created_at).toLocaleString('pt-BR')}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="mx-auto mt-12 max-w-4xl">
+        <h2 className="font-display text-sm uppercase tracking-[0.18em] text-gold-400">
+          Respostas de escolha
+        </h2>
+        {choices.length === 0 ? (
+          <p className="mt-4 text-sm text-parchment-400">Nenhuma resposta ainda.</p>
+        ) : (
+          <div className="mt-4 flex flex-col gap-3">
+            {choices.map((question) => (
+              <div key={question.questionId} className="rounded-2xl border border-white/10 bg-ink-900 p-5">
+                <div className="flex items-baseline justify-between gap-4">
+                  <p className="text-sm leading-snug text-parchment-100">{question.prompt}</p>
+                  <p className="shrink-0 text-xs text-parchment-400">{question.total} resp.</p>
+                </div>
+                <div className="mt-4 flex flex-col gap-2">
+                  {question.options.map((option) => (
+                    <div key={option.label}>
+                      <div className="flex items-baseline justify-between gap-3">
+                        <p className="text-sm text-parchment-400">{option.label}</p>
+                        <p className="shrink-0 font-display text-sm text-gold-400">
+                          {option.share}%{' '}
+                          <span className="text-xs text-parchment-400">({option.count})</span>
+                        </p>
+                      </div>
+                      <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/10">
+                        <div className="h-full bg-gold-400/70" style={{ width: `${option.share}%` }} />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
