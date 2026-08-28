@@ -6,6 +6,7 @@ import {
   OPEN_POOL,
   buildQuizSessionOrder,
   getQuestionById,
+  getAnswerLabel,
 } from '../quiz-questions';
 
 describe('QUIZ_QUESTION_POOL', () => {
@@ -96,5 +97,30 @@ describe('buildQuizSessionOrder', () => {
     })();
     const b = buildQuizSessionOrder(fixedRandom2);
     expect(a).toEqual(b);
+  });
+});
+
+describe('getAnswerLabel', () => {
+  it('returns the label the reader actually picked', () => {
+    expect(getAnswerLabel('situacao_atual', 'amor')).toBe('Estou vivendo algo intenso no amor');
+  });
+
+  it('resolves questions drawn from the choice pool, not just the anchors', () => {
+    const pooled = CHOICE_POOL[0];
+    expect(getAnswerLabel(pooled.id, pooled.type === 'choice' ? pooled.options[0].id : '')).toBe(
+      pooled.type === 'choice' ? pooled.options[0].label : undefined,
+    );
+  });
+
+  it('returns undefined for an answer id the question does not offer', () => {
+    expect(getAnswerLabel('situacao_atual', 'nao_existe')).toBeUndefined();
+  });
+
+  it('returns undefined for an unknown question', () => {
+    expect(getAnswerLabel('nao_existe', 'amor')).toBeUndefined();
+  });
+
+  it('returns undefined for open questions, which have no labelled options', () => {
+    expect(getAnswerLabel(OPEN_POOL[0].id, 'qualquer coisa')).toBeUndefined();
   });
 });

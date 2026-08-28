@@ -1,6 +1,6 @@
 import type { FullReport, QuizSession, Report, SpreadCard } from './report-types';
 import { GENIE_REACTIONS } from './genie-lines';
-import { OPEN_POOL } from './quiz-questions';
+import { OPEN_POOL, getAnswerLabel } from './quiz-questions';
 import { CARD_POSITIONS, TAROT_CARDS, buildPositionReading } from './tarot-cards';
 
 const SITUATION_CONTENT: Record<
@@ -124,6 +124,17 @@ const FULL_REPORT_CONTENT: Record<string, FullReport> = {
   },
 };
 
+// Short headings for the answers echoed back at the top of the report. Keyed by
+// anchor question id, so every session has them regardless of the randomized
+// pool draw. Kept to two or three words each: on a phone this renders as a
+// label/answer pair per row and long headings push the answer onto its own line.
+const ECHO_LABELS: Record<string, string> = {
+  situacao_atual: 'Seu momento',
+  elemento: 'Seu elemento',
+  rotina_atual: 'Sua rotina',
+  lida_incerteza: 'Na incerteza',
+};
+
 const DEFAULT_SITUATION = SITUATION_CONTENT.fase_nova;
 const DEFAULT_TRAIT = SITUATION_TRAIT.fase_nova;
 const DEFAULT_ELEMENT = ELEMENT_CONTENT.agua;
@@ -144,14 +155,21 @@ export function generateMockReport(session: QuizSession): Report {
     return acc;
   }, []);
   const full = FULL_REPORT_CONTENT[situationKey] ?? FULL_REPORT_CONTENT.fase_nova;
+  const personalizedEcho = Object.entries(ECHO_LABELS).flatMap(([questionId, label]) => {
+    const answerId = session.answers[questionId];
+    const answer = answerId ? getAnswerLabel(questionId, answerId) : undefined;
+    return answer ? [{ label, answer }] : [];
+  });
 
   return {
+    reader_name: name,
     title: 'Sua Leitura de Hoje',
     opening: `${name}, respire fundo. O que você está prestes a ler foi montado a partir do que você mesmo(a) trouxe até aqui.`,
     current_moment: situation.current_moment,
     strengths: situation.strengths,
     tensions: situation.tensions,
-    personalized_teaser: `Existe algo nas suas respostas que chamou nossa atenção...\n\nVocê mencionou que "${excerpt}".\n\nIsso aparece de forma interessante quando cruzamos sua leitura atual com o que você está vivendo.\n\nE é justamente aqui que começa a parte mais importante da sua leitura.`,
+    personalized_teaser: `${name}, com as suas palavras: "${excerpt}".\n\nFoi essa frase, cruzada com o que você marcou acima, que definiu as cartas da sua tiragem. Ninguém que respondeu diferente de você recebe a mesma leitura.\n\nO que vem a seguir parte exatamente daí.`,
+    personalized_echo: personalizedEcho,
     sections: [{ title: 'O que seu elemento revela', content: elementContent }],
     final_message: `Essa é só a primeira camada da sua leitura, ${name}. O que vem a seguir mostra pra onde tudo isso está te levando.`,
     spread,

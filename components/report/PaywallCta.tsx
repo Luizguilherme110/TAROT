@@ -42,17 +42,27 @@ export function PaywallCta() {
             </li>
           ))}
         </ul>
+        {/* Price sits above the button: the reader should know the number before
+            the thing that asks for the tap, not after they have already read past it. */}
+        <div className="mt-8">
+          <p className="text-sm text-parchment-400">
+            De <span className="line-through">R$ 47,00</span> por
+          </p>
+          <p className="mt-1 font-display text-4xl leading-none text-gold-400">R$ 19,90</p>
+          <p className="mt-2 text-xs text-parchment-400">Pagamento único. Sem assinatura.</p>
+        </div>
+
         <button
           type="button"
           onClick={handleClick}
-          className="mt-8 inline-flex items-center justify-center rounded-full bg-gold-400 px-10 py-4 font-display text-sm font-medium text-ink-950 shadow-gold transition-transform duration-300 ease-out hover:-translate-y-0.5 hover:bg-gold-300 active:scale-[0.98]"
+          className="mt-6 flex w-full items-center justify-center rounded-full bg-gold-400 px-8 py-4 font-display text-base font-medium text-ink-950 shadow-gold transition-transform duration-300 ease-out hover:-translate-y-0.5 hover:bg-gold-300 active:scale-[0.98] sm:mx-auto sm:w-auto sm:px-12"
         >
           Desbloquear leitura completa
         </button>
-        <p className="mt-3 font-display text-lg text-gold-400">R$ 19,90</p>
-        <p className="mt-2 text-xs leading-snug text-parchment-400">
-          Essa leitura foi montada a partir do seu momento atual. Quanto mais tempo passa, menos ela reflete onde
-          você está agora.
+
+        <p className="mt-4 text-xs leading-snug text-parchment-400">
+          Você respondeu a partir do que está vivendo agora. Daqui a algumas semanas suas respostas seriam
+          outras — e a leitura também. Essa é a do seu momento de hoje.
         </p>
       </div>
     </section>

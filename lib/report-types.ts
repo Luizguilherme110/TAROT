@@ -19,12 +19,16 @@ export type FullReport = {
 };
 
 export type Report = {
+  /** The reader's own name, or 'você' when they skipped it. */
+  reader_name: string;
   title: string;
   opening: string;
   current_moment: string;
   strengths: string[];
   tensions: string[];
   personalized_teaser: string;
+  /** The reader's own answers, quoted back verbatim as proof the report is theirs. */
+  personalized_echo: { label: string; answer: string }[];
   sections: { title: string; content: string }[];
   final_message: string;
   genie_intro: { mood: GenieMood; line: string };

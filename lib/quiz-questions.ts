@@ -363,6 +363,17 @@ export function getQuestionById(id: string): QuizQuestion | undefined {
   return QUESTIONS_BY_ID.get(id);
 }
 
+/**
+ * The human label a reader actually picked, so the report can quote their own
+ * words back at them instead of paraphrasing. Only choice questions have
+ * labels; open, name and birthdate answers are already free text.
+ */
+export function getAnswerLabel(questionId: string, answerId: string): string | undefined {
+  const question = getQuestionById(questionId);
+  if (!question || question.type !== 'choice') return undefined;
+  return question.options.find((option) => option.id === answerId)?.label;
+}
+
 function shuffle<T>(items: T[], random: () => number): T[] {
   const result = [...items];
   for (let i = result.length - 1; i > 0; i--) {

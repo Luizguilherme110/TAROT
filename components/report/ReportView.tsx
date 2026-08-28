@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { motion, useReducedMotion } from 'motion/react';
+import { LockSimple } from '@phosphor-icons/react/dist/ssr';
 import type { Report } from '@/lib/report-types';
 import { POSITION_LABEL } from '@/lib/tarot-cards';
 import { GenieAvatar } from '@/components/genie/GenieAvatar';
@@ -10,11 +11,13 @@ import { FeedbackForm } from '@/components/feedback/FeedbackForm';
 import { TeaserBlock } from './TeaserBlock';
 import { LockedSection } from './LockedSection';
 import { PaywallCta } from './PaywallCta';
+import { PersonalEcho } from './PersonalEcho';
+import { LeadCapture } from './LeadCapture';
 import { usePaymentStatus } from './usePaymentStatus';
 
 export function ReportView({ report }: { report: Report }) {
-  const pointCount = report.strengths.length + report.tensions.length;
   const paid = usePaymentStatus();
+  const pointCount = report.strengths.length + report.tensions.length;
   const presenteCard = report.spread.find((entry) => entry.position === 'presente');
   const futuroCard = report.spread.find((entry) => entry.position === 'futuro');
 
@@ -30,9 +33,13 @@ export function ReportView({ report }: { report: Report }) {
       <h1 className="mt-3 font-display text-3xl leading-tight text-parchment-100 md:text-4xl">{report.title}</h1>
       <p className="mt-6 text-lg leading-relaxed text-parchment-400">{report.opening}</p>
 
+      {!paid && <PersonalEcho entries={report.personalized_echo} name={report.reader_name} />}
+
       <CardSpread spread={report.spread} paid={paid} />
 
       <TeaserBlock teaser={report.personalized_teaser} />
+
+      {!paid && <LeadCapture />}
 
       {paid ? (
         <div className="mt-4">
@@ -63,16 +70,22 @@ export function ReportView({ report }: { report: Report }) {
       ) : (
         <>
           <UnlockedSection title="Seu momento atual" content={report.current_moment} />
+          {/* Six rows, not ten. A taller stack of near-identical locks stops
+              reading as withheld content and starts reading as a toll gate —
+              and on a phone it was most of a screen of nothing but padlocks.
+              Nothing is withheld by this: the paid branch above still renders
+              every section, these titles just group them. */}
           <div className="mt-4 divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10 bg-ink-900 shadow-panel">
             <LockedSection title="Pontos fortes e pontos de atenção" hint={`${pointCount} pontos identificados`} />
             <LockedSection title="Próximos meses" />
             <LockedSection title="Amor e relacionamentos" />
             <LockedSection title="Carreira e dinheiro" />
-            <LockedSection title="O que merece sua atenção" />
-            <LockedSection title="Possível ponto de alerta" />
-            <LockedSection title={report.sections[0]?.title ?? 'O que seu elemento revela'} />
-            <LockedSection title="Sua carta do Presente, revelada" />
-            <LockedSection title="Sua carta do Futuro, revelada" />
+            <LockedSection
+              title="Suas cartas do Presente e do Futuro, interpretadas"
+              hint={
+                futuroCard ? `Incluindo o que ${futuroCard.card.name} significa pra você` : undefined
+              }
+            />
             <LockedSection title="Mensagem final" />
           </div>
           <PaywallCta />
@@ -101,7 +114,11 @@ function CardSpread({ spread, paid }: { spread: Report['spread']; paid: boolean 
       <div className="absolute inset-0 bg-gradient-to-b from-ink-950/80 via-ink-950/70 to-ink-950/90" />
       <div className="relative grid grid-cols-3 gap-4 p-6">
         {spread.map((entry, index) => {
-        const locked = entry.position !== 'passado' && !paid;
+        // The card itself is always revealed, only its reading is gated.
+        // A row of anonymous padlocks gives a reader nothing to be curious
+        // about; seeing "A Torre" sit in their Futuro and not knowing what it
+        // means is the thing that makes them want the rest.
+        const meaningLocked = entry.position !== 'passado' && !paid;
         return (
           <motion.div
             key={entry.position}
@@ -111,11 +128,15 @@ function CardSpread({ spread, paid }: { spread: Report['spread']; paid: boolean 
             transition={{ duration: 0.5, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col items-center gap-2"
           >
-            <CardFace icon={entry.card.icon} locked={locked} />
+            <CardFace icon={entry.card.icon} />
             <p className="text-[11px] uppercase tracking-[0.1em] text-gold-400">{POSITION_LABEL[entry.position]}</p>
-            <p className="text-center text-xs leading-snug text-parchment-100">
-              {locked ? 'Trancada' : entry.card.name}
-            </p>
+            <p className="text-center text-xs leading-snug text-parchment-100">{entry.card.name}</p>
+            {meaningLocked && (
+              <p className="flex items-center gap-1 text-center text-[10px] leading-tight text-parchment-400">
+                <LockSimple size={10} weight="bold" className="shrink-0 text-gold-400" />
+                significado
+              </p>
+            )}
           </motion.div>
           );
         })}

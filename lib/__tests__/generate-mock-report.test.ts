@@ -56,3 +56,45 @@ describe('generateMockReport', () => {
     expect(report.genie_intro.line).toContain('virada de ciclo');
   });
 });
+
+describe('personalized_echo', () => {
+  it('quotes back the labels of the answers the reader actually chose', () => {
+    const report = generateMockReport(makeSession());
+    expect(report.personalized_echo).toContainEqual({
+      label: 'Seu momento',
+      answer: 'Estou vivendo algo intenso no amor',
+    });
+    expect(report.personalized_echo).toContainEqual({
+      label: 'Seu elemento',
+      answer: 'Água, sensibilidade e emoção',
+    });
+  });
+
+  it('omits anchor questions the reader never answered', () => {
+    const report = generateMockReport(makeSession({ answers: { situacao_atual: 'amor' } }));
+    expect(report.personalized_echo).toHaveLength(1);
+    expect(report.personalized_echo[0].label).toBe('Seu momento');
+  });
+
+  it('is empty rather than throwing when nothing was answered', () => {
+    const report = generateMockReport(makeSession({ answers: {} }));
+    expect(report.personalized_echo).toEqual([]);
+  });
+
+  it('never echoes a raw answer id, only the human label', () => {
+    const report = generateMockReport(makeSession());
+    for (const entry of report.personalized_echo) {
+      expect(entry.answer).not.toMatch(/^[a-z_]+$/);
+    }
+  });
+});
+
+describe('reader_name', () => {
+  it('carries the name the reader gave', () => {
+    expect(generateMockReport(makeSession()).reader_name).toBe('Ana');
+  });
+
+  it('falls back to "você" when the name was skipped', () => {
+    expect(generateMockReport(makeSession({ name: '  ' })).reader_name).toBe('você');
+  });
+});
