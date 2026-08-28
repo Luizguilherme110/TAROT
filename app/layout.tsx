@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {`window.pixelId = "${UTMIFY_PIXEL_ID}";`}
         </Script>
         <Script src={UTMIFY_PIXEL_SCRIPT_URL} strategy="afterInteractive" async defer />
-        <Script id="clarity" strategy="afterInteractive">
+        <Script id="ms-clarity" strategy="afterInteractive">
           {claritySnippet}
         </Script>
         <noscript>
