@@ -18,14 +18,15 @@ export function PaywallCta() {
     trackEvent('paywall_checkout_click');
     const url = buildCaktoCheckoutUrl(getOrCreateSessionId());
 
-    // Open the checkout beside the report rather than navigating away from it.
-    // The report tab stays mounted and polling, so switching back after paying
-    // unlocks it on the focus re-check — no dependence on Cakto being
-    // configured to redirect, and no reliance on the reader pressing Back.
-    // Popup blockers allow this because it runs inside a click handler; if one
-    // still refuses, fall back to navigating in place.
-    const tab = window.open(url, '_blank', 'noopener,noreferrer');
-    if (!tab) window.location.href = url;
+    // Navigate in place. Cakto is configured to send the reader back to
+    // /leitura/resultado once the card or PIX is approved, and the session id
+    // and quiz answers now live in localStorage, so the returning page rebuilds
+    // the same report and usePaymentStatus polls until the webhook lands.
+    //
+    // A second tab would also work, but much of this funnel arrives from Meta
+    // ads inside the Instagram/Facebook in-app browser, where window.open is
+    // unreliable and a stranded duplicate tab is worse than a plain redirect.
+    window.location.href = url;
   }
 
   return (
