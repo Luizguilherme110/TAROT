@@ -1,4 +1,4 @@
-import { Star, CurrencyDollar } from '@phosphor-icons/react/dist/ssr';
+import { Star, CurrencyDollar, DownloadSimple } from '@phosphor-icons/react/dist/ssr';
 import {
   getFunnelCounts,
   getRecentFeedback,
@@ -26,9 +26,21 @@ export default async function AdminPage() {
 
   return (
     <div className="min-h-dvh bg-ink-950 px-6 py-12 md:px-12">
-      <div className="mx-auto flex max-w-4xl items-center justify-between">
+      <div className="mx-auto flex max-w-4xl items-center justify-between gap-3">
         <h1 className="font-display text-2xl text-parchment-100">Analytics</h1>
-        <LogoutButton />
+        <div className="flex items-center gap-2">
+          {/* A plain link, not a fetch: the browser saves the file straight from
+              the response, and the admin cookie rides along because /admin/export
+              sits under the cookie's path. */}
+          <a
+            href="/admin/export"
+            className="flex items-center gap-2 rounded-full border border-gold-400/40 px-4 py-2 text-sm text-gold-400 transition-colors duration-200 hover:border-gold-400 hover:text-parchment-100"
+          >
+            <DownloadSimple size={16} weight="bold" />
+            Exportar CSV
+          </a>
+          <LogoutButton />
+        </div>
       </div>
 
       <section className="mx-auto mt-10 max-w-4xl">

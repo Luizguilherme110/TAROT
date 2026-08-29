@@ -1,5 +1,5 @@
 import { getSupabaseServiceClient } from '@/lib/supabase/server';
-import { getQuestionById, getAnswerLabel } from '@/lib/quiz-questions';
+import { getQuestionById, getAnswerLabel, QUIZ_QUESTION_POOL } from '@/lib/quiz-questions';
 
 const FUNNEL_STEPS = [
   { event: 'landing_view', label: 'Visitou a landing' },
@@ -149,4 +149,70 @@ export async function getChoiceBreakdown(): Promise<ChoiceBreakdown[]> {
       };
     })
     .sort((a, b) => b.total - a.total);
+}
+
+/**
+ * One row per reader, every answer they gave side by side — the shape you want
+ * when reading the data for ad hooks, since a quote only means something next
+ * to the situation the person picked and whether they ended up buying.
+ */
+export type SessionExport = { headers: string[]; rows: string[][] };
+
+// Name and birth date never reach quiz_responses (QuizFlow only saves choice
+// and open answers), so the columns are exactly the questions that do.
+const EXPORT_QUESTIONS = QUIZ_QUESTION_POOL.filter(
+  (question) => question.type === 'choice' || question.type === 'open',
+);
+
+export async function getSessionExport(): Promise<SessionExport> {
+  const supabase = getSupabaseServiceClient();
+
+  const [responsesResult, paymentsResult, leadsResult] = await Promise.all([
+    supabase
+      .from('quiz_responses')
+      .select('session_id, question_id, answer, created_at')
+      .order('created_at', { ascending: false })
+      .limit(10000),
+    supabase.from('payments').select('session_id').eq('status', 'paid'),
+    supabase.from('leads').select('session_id, email'),
+  ]);
+
+  const responses = latestPerSessionQuestion((responsesResult.data ?? []) as RawResponse[]);
+  const paidSessions = new Set(((paymentsResult.data ?? []) as { session_id: string }[]).map((row) => row.session_id));
+  const emailBySession = new Map(
+    ((leadsResult.data ?? []) as { session_id: string; email: string }[]).map((row) => [row.session_id, row.email]),
+  );
+
+  type Session = { startedAt: string; answers: Map<string, string> };
+  const bySession = new Map<string, Session>();
+
+  for (const row of responses) {
+    const session = bySession.get(row.session_id) ?? { startedAt: row.created_at, answers: new Map() };
+    // Rows arrive newest first, so each one seen pushes the start time earlier.
+    session.startedAt = row.created_at;
+    session.answers.set(row.question_id, getAnswerLabel(row.question_id, row.answer) ?? row.answer);
+    bySession.set(row.session_id, session);
+  }
+
+  const headers = [
+    'sessao',
+    'data',
+    'pagou',
+    'email',
+    'respostas_preenchidas',
+    ...EXPORT_QUESTIONS.map((question) => question.prompt),
+  ];
+
+  const rows = [...bySession.entries()]
+    .sort((a, b) => b[1].startedAt.localeCompare(a[1].startedAt))
+    .map(([sessionId, session]) => [
+      sessionId,
+      new Date(session.startedAt).toLocaleString('pt-BR'),
+      paidSessions.has(sessionId) ? 'sim' : 'nao',
+      emailBySession.get(sessionId) ?? '',
+      String(session.answers.size),
+      ...EXPORT_QUESTIONS.map((question) => session.answers.get(question.id) ?? ''),
+    ]);
+
+  return { headers, rows };
 }
