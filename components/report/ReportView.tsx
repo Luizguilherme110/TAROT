@@ -108,21 +108,27 @@ export function ReportView({
               Nothing is withheld by this: the paid branch above still renders
               every section, these titles just group them. */}
           <div className="mt-4 divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10 bg-ink-900 shadow-panel">
-            <LockedSection title="Pontos fortes e pontos de atenção" hint={`${pointCount} pontos identificados`} />
+            <LockedSection
+              title="Pontos fortes e pontos de atenção"
+              hint={`${pointCount} pontos identificados`}
+              variant="pontos"
+            />
             <LockedSection
               title="O que sua data de nascimento revela"
               hint={birthSign ? `Sua leitura de ${birthSign} e o seu número` : undefined}
+              variant="nascimento"
             />
-            <LockedSection title="Próximos meses" />
-            <LockedSection title="Amor e relacionamentos" />
-            <LockedSection title="Carreira e dinheiro" />
+            <LockedSection title="Próximos meses" variant="meses" />
+            <LockedSection title="Amor e relacionamentos" variant="amor" />
+            <LockedSection title="Carreira e dinheiro" variant="carreira" />
             <LockedSection
               title="Suas cartas do Presente e do Futuro, interpretadas"
               hint={
                 futuroCard ? `Incluindo o que ${futuroCard.card.name} significa pra você` : undefined
               }
+              variant="cartas"
             />
-            <LockedSection title="Mensagem final" />
+            <LockedSection title="Mensagem final" variant="final" />
           </div>
           <PaywallCta />
         </>
