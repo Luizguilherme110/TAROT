@@ -6,7 +6,17 @@ import { browserStorage, readPersisted, writePersisted } from '@/lib/persistent-
 
 const STORAGE_KEY = 'tarot_quiz_session_v1';
 
-type QuizContextValue = { state: QuizState; dispatch: Dispatch<QuizAction> };
+type QuizContextValue = {
+  state: QuizState;
+  dispatch: Dispatch<QuizAction>;
+  /**
+   * False until the stored session has been read back on mount. Anything that
+   * acts on the reader's answers must wait for it — the paid report is built
+   * from `state`, and firing while `state` is still `initialQuizState` would
+   * hand a paying reader a reading of an empty session.
+   */
+  hasHydrated: boolean;
+};
 
 const QuizContext = createContext<QuizContextValue | null>(null);
 
@@ -40,7 +50,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     writePersisted(STORAGE_KEY, JSON.stringify(state), browserStorage('local'));
   }, [state, hasHydrated]);
 
-  return <QuizContext.Provider value={{ state, dispatch }}>{children}</QuizContext.Provider>;
+  return <QuizContext.Provider value={{ state, dispatch, hasHydrated }}>{children}</QuizContext.Provider>;
 }
 
 export function useQuiz(): QuizContextValue {

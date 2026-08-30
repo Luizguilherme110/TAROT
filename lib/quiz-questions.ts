@@ -66,6 +66,11 @@ export const CHOICE_POOL: QuizQuestion[] = [
     options: [
       { id: 'medo_abrir', label: 'Medo de me abrir de novo' },
       { id: 'dar_mais', label: 'Sinto que dou mais do que recebo' },
+      // Added from the 2026-08-29 export: over half the readers who wrote
+      // anything wrote about one specific person who left ("meu ex vai me
+      // procurar", "se ele ainda gosta de mim"), and none of the four options
+      // above let them say it. They were picking whichever was least wrong.
+      { id: 'esperando_volta', label: 'Espero uma resposta de alguém que se afastou' },
       { id: 'falta_algo', label: 'Está tudo bem, mas falta algo' },
       { id: 'sozinho', label: 'Estou sozinho(a), e tudo bem por enquanto' },
     ],
@@ -308,28 +313,28 @@ export const OPEN_POOL: QuizQuestion[] = [
     id: 'sono',
     type: 'open',
     prompt: 'O que mais tem tirado seu sono ultimamente?',
-    placeholder: 'Escreva com suas palavras...',
+    placeholder: 'Ex: não sei se devo continuar nesse relacionamento',
     maxLength: 280,
   },
   {
     id: 'deixar_para_tras',
     type: 'open',
-    prompt: 'Existe algo que você sente que precisa deixar para trás?',
-    placeholder: 'Escreva com suas palavras...',
+    prompt: 'O que você sente que precisa deixar para trás?',
+    placeholder: 'Ex: a culpa de ter aguentado tanto tempo',
     maxLength: 280,
   },
   {
     id: 'medo_nao_dito',
     type: 'open',
-    prompt: 'Existe algo que você tem medo de admitir, mesmo pra si mesmo(a)?',
-    placeholder: 'Escreva com suas palavras...',
+    prompt: 'O que você tem medo de admitir, mesmo pra si mesmo(a)?',
+    placeholder: 'Ex: que ainda não superei alguém',
     maxLength: 280,
   },
   {
     id: 'pergunta_ao_universo',
     type: 'open',
-    prompt: 'Se pudesse fazer uma pergunta e ter certeza da resposta, qual seria?',
-    placeholder: 'Escreva com suas palavras...',
+    prompt: 'Qual pergunta você faria, se pudesse ter certeza da resposta?',
+    placeholder: 'Ex: ele ainda pensa em mim?',
     maxLength: 280,
   },
 ];

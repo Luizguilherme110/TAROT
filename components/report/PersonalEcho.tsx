@@ -7,7 +7,15 @@ import type { Report } from '@/lib/report-types';
 //
 // Laid out as stacked rows rather than a two-column grid: on a phone a label and
 // a full sentence side by side leaves the answer three words wide.
-export function PersonalEcho({ entries, name }: { entries: Report['personalized_echo']; name: string }) {
+export function PersonalEcho({
+  entries,
+  name,
+  paid,
+}: {
+  entries: Report['personalized_echo'];
+  name: string;
+  paid: boolean;
+}) {
   if (entries.length === 0) return null;
 
   return (
@@ -27,7 +35,9 @@ export function PersonalEcho({ entries, name }: { entries: Report['personalized_
         ))}
       </ul>
       <p className="mt-5 border-t border-white/10 pt-4 text-sm leading-snug text-parchment-400">
-        Foi isso que {name} respondeu — e é só a partir disso que a leitura abaixo foi montada.
+        {paid
+          ? `Cada seção abaixo foi montada a partir de uma dessas respostas — nenhuma outra leitura combina exatamente essas.`
+          : `Foi isso que ${name} respondeu — e é só a partir disso que a leitura abaixo foi montada.`}
       </p>
     </section>
   );

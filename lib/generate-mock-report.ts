@@ -1,7 +1,9 @@
-import type { FullReport, QuizSession, Report, SpreadCard } from './report-types';
+import type { QuizSession, Report, SpreadCard } from './report-types';
 import { GENIE_REACTIONS } from './genie-lines';
-import { OPEN_POOL, getAnswerLabel } from './quiz-questions';
+import { getAnswerLabel } from './quiz-questions';
+import { collectQuotableAnswers } from './quotable-answer';
 import { CARD_POSITIONS, TAROT_CARDS, buildPositionReading } from './tarot-cards';
+import { getZodiacSign } from './birth-chart';
 
 const SITUATION_CONTENT: Record<
   string,
@@ -71,68 +73,39 @@ const SITUATION_TRAIT: Record<string, string> = {
   fase_nova: 'alguém em plena virada de ciclo',
 };
 
-const FULL_REPORT_CONTENT: Record<string, FullReport> = {
-  amor: {
-    months_ahead:
-      'Nos próximos meses, algo que estava travado no campo afetivo começa a se mover. Não espere uma virada de um dia pro outro: é mais um destravar aos poucos, na medida em que você parar de se antecipar ao que o outro vai sentir.',
-    love: 'Se você está numa relação, o convite é abrir uma conversa que vem adiando, mesmo com medo da resposta. Se está sozinho(a), o próximo vínculo que importa provavelmente não vai parecer com o que você imaginava — e é bom sinal.',
-    career_money:
-      'No campo profissional, sua tendência de carregar o emocional do trabalho pra casa (e vice-versa) pode custar uma oportunidade se não for observada agora.',
-    attention:
-      'Preste atenção em quantas vezes você diz "tá tudo bem" quando não está, especialmente perto de quem você mais confia.',
-    warning:
-      'Ponto de alerta: mágoas antigas não resolvidas tendem a aparecer disfarçadas de ciúme ou desconfiança num vínculo novo. Vale nomear a origem antes de reagir.',
-    final_message:
-      'Você já sabe sentir fundo. O que falta agora não é sentir mais, é confiar que o que você sente merece ser dito em voz alta.',
-  },
-  decisao: {
-    months_ahead:
-      'A decisão que você vem adiando não vai ficar mais clara com mais tempo de análise — ela vai ficar mais clara com uma ação pequena e reversível que te tire do "e se".',
-    love: 'Enquanto essa escolha estiver em aberto, vínculos ao seu redor podem sentir sua ausência mesmo com você presente. Vale avisar quem te importa que sua cabeça está ocupada, não distante.',
-    career_money:
-      'Financeiramente, essa indecisão tem um custo silencioso: oportunidades que exigem resposta rápida podem estar passando enquanto você pesa prós e contras pela enésima vez.',
-    attention:
-      'Observe quantas vezes você pede a opinião de outra pessoa antes de admitir, pra si mesmo(a), o que você já sabe que quer.',
-    warning:
-      'Ponto de alerta: existe uma diferença entre ser cauteloso(a) e usar a análise como desculpa pra não se comprometer com nada. Vale reconhecer em qual dos dois você está agora.',
-    final_message:
-      'Você não precisa ter certeza absoluta pra dar o próximo passo. Precisa só de coragem suficiente pra dar um passo que você possa corrigir depois.',
-  },
-  dinheiro: {
-    months_ahead:
-      'Os próximos meses pedem menos foco em "ganhar mais" e mais foco em entender pra onde o que você já ganha está indo. Uma revisão simples nos hábitos financeiros rende mais do que parece agora.',
-    love: 'Questões de dinheiro tendem a aparecer em conversas afetivas neste período — sejam suas ou de alguém próximo. Vale separar autoestima de saldo bancário antes que a mistura pese na relação.',
-    career_money:
-      'Uma oportunidade de renda extra ou mudança profissional pode surgir, mas só vai valer a pena se você já tiver clareza do padrão que quer romper, não só do valor que quer alcançar.',
-    attention: 'Preste atenção em decisões financeiras tomadas por impulso pra aliviar ansiedade — elas tendem a se repetir em ciclo.',
-    warning:
-      'Ponto de alerta: promessas de ganho fácil ou rápido merecem desconfiança redobrada neste momento, mesmo vindas de gente próxima.',
-    final_message:
-      'Você já enxerga os padrões que te atrapalham. A próxima camada é agir diferente uma única vez — o resto vem depois, por repetição.',
-  },
-  fase_nova: {
-    months_ahead:
-      'O fechamento de ciclo que você sente se confirma nos próximos meses, mas o começo do próximo não vai chegar anunciado — você vai precisar decidir dar o primeiro passo antes de sentir 100% de segurança.',
-    love: 'Vínculos que não acompanham essa mudança de fase tendem a se distanciar naturalmente, sem drama. Não force nenhum deles a continuar do jeito que estava.',
-    career_money:
-      'No campo profissional ou financeiro, essa é uma fase de plantar, não de colher. Decisões tomadas agora rendem resultado visível daqui a alguns meses, não imediatamente.',
-    attention: 'Observe o quanto você fica no "quase decidindo" — é aí que a energia mais se perde neste momento.',
-    warning:
-      'Ponto de alerta: recomeçar sozinho(a) assusta, mas esperar companhia pra dar o primeiro passo pode custar o momento certo de agir.',
-    final_message:
-      'Você já sabe se adaptar rápido quando decide de verdade. O que falta não é capacidade, é permissão pra começar antes de estar pronto(a).',
-  },
-};
-
-// Short headings for the answers echoed back at the top of the report. Keyed by
-// anchor question id, so every session has them regardless of the randomized
-// pool draw. Kept to two or three words each: on a phone this renders as a
-// label/answer pair per row and long headings push the answer onto its own line.
+// Short headings for the answers echoed back to the reader. Keyed by question
+// id and covering the whole pool, not just the anchors: a session draws eight
+// random choice questions, and every one of them that goes unlabelled is a row
+// of proof missing from the echo. Kept to two or three words each — on a phone
+// this renders as a label/answer pair per row, and a long heading pushes the
+// answer onto its own line.
 const ECHO_LABELS: Record<string, string> = {
   situacao_atual: 'Seu momento',
   elemento: 'Seu elemento',
   rotina_atual: 'Sua rotina',
   lida_incerteza: 'Na incerteza',
+  peso_relacoes: 'Nas relações',
+  mudar_agora: 'Mudaria hoje',
+  depois_do_erro: 'Quando erra',
+  o_que_muda: 'Prestes a mudar',
+  esperanca: 'Sua esperança',
+  dia_dificil: 'Em dia difícil',
+  medo_atual: 'Seu medo',
+  energia_hoje: 'Sua energia',
+  sinal_universo: 'Diante dos sinais',
+  papel_social: 'Seu papel',
+  relacao_passado: 'Com o passado',
+  proxima_conquista: 'Quer conquistar',
+  reacao_criticas: 'Diante da crítica',
+  espaco_pessoal: 'Sua paz',
+  padrao_repetido: 'O que se repete',
+  forca_interior: 'Sua força',
+  bloqueio_atual: 'Seu bloqueio',
+  visao_futuro: 'Sobre o futuro',
+  relacao_dinheiro: 'Com dinheiro',
+  apoio_emocional: 'Busca apoio em',
+  intuicao_decisoes: 'Sua intuição',
+  sensacao_hoje: 'Seu clima',
 };
 
 const DEFAULT_SITUATION = SITUATION_CONTENT.fase_nova;
@@ -144,9 +117,10 @@ export function generateMockReport(session: QuizSession): Report {
   const situationKey = session.answers.situacao_atual;
   const situation = SITUATION_CONTENT[situationKey] ?? DEFAULT_SITUATION;
   const elementContent = ELEMENT_CONTENT[session.answers.elemento] ?? DEFAULT_ELEMENT;
-  const excerpt =
-    OPEN_POOL.map((question) => session.answers[question.id]?.trim()).find(Boolean) ??
-    'algo que ainda não coloquei em palavras';
+  // Only a quote that carries something: real sessions answer "Existe algo
+  // que...?" with a bare "Sim", and `com as suas palavras: "Sim"` sinks the
+  // teaser exactly where it has to do its work.
+  const excerpt = collectQuotableAnswers(session)[0] ?? 'algo que ainda não coloquei em palavras';
   const cardIds = session.cardIds ?? [];
   const spread: SpreadCard[] = CARD_POSITIONS.reduce<SpreadCard[]>((acc, position, index) => {
     const card = TAROT_CARDS.find((candidate) => candidate.id === cardIds[index]);
@@ -154,12 +128,19 @@ export function generateMockReport(session: QuizSession): Report {
     acc.push({ position, card, reading: buildPositionReading(position, card.meaning) });
     return acc;
   }, []);
-  const full = FULL_REPORT_CONTENT[situationKey] ?? FULL_REPORT_CONTENT.fase_nova;
+
+  const birth = getZodiacSign(session.birthDate);
+
   const personalizedEcho = Object.entries(ECHO_LABELS).flatMap(([questionId, label]) => {
     const answerId = session.answers[questionId];
     const answer = answerId ? getAnswerLabel(questionId, answerId) : undefined;
     return answer ? [{ label, answer }] : [];
   });
+  // The sign is the one echo row the reader never picked from a list, which is
+  // exactly why it reads as the reading knowing something about them.
+  if (birth) {
+    personalizedEcho.push({ label: 'Seu signo', answer: birth.label });
+  }
 
   return {
     reader_name: name,
@@ -177,6 +158,5 @@ export function generateMockReport(session: QuizSession): Report {
       mood: GENIE_REACTIONS.situacao_atual[situationKey]?.mood ?? 'neutral',
       line: `${name}, vejo que você é ${SITUATION_TRAIT[situationKey] ?? DEFAULT_TRAIT}.`,
     },
-    full,
   };
 }

@@ -15,6 +15,10 @@ export type FullReport = {
   career_money: string;
   attention: string;
   warning: string;
+  /** The reader's own sentences, quoted back inside the part they paid for. */
+  your_words: string;
+  /** Sign plus life-path reading, or '' when the birth date was skipped. */
+  birth_reading: string;
   final_message: string;
 };
 
@@ -33,7 +37,6 @@ export type Report = {
   final_message: string;
   genie_intro: { mood: GenieMood; line: string };
   spread: SpreadCard[];
-  full: FullReport;
 };
 
 export type QuizSession = {

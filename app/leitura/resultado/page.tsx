@@ -7,12 +7,12 @@ import { ReportView } from '@/components/report/ReportView';
 import { trackEvent } from '@/lib/analytics/track';
 
 export default function ResultadoPage() {
-  const { state } = useQuiz();
+  const { state, hasHydrated } = useQuiz();
   const report = useMemo(() => generateMockReport(state), [state]);
 
   useEffect(() => {
     trackEvent('report_view');
   }, []);
 
-  return <ReportView report={report} />;
+  return <ReportView report={report} session={state} sessionReady={hasHydrated} />;
 }

@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { motion, useReducedMotion } from 'motion/react';
 import { LockSimple } from '@phosphor-icons/react/dist/ssr';
-import type { Report } from '@/lib/report-types';
+import type { QuizSession, Report } from '@/lib/report-types';
 import { POSITION_LABEL } from '@/lib/tarot-cards';
 import { GenieAvatar } from '@/components/genie/GenieAvatar';
 import { CardFace } from '@/components/cards/CardFace';
@@ -14,15 +14,28 @@ import { PaywallCta } from './PaywallCta';
 import { PersonalEcho } from './PersonalEcho';
 import { LeadCapture } from './LeadCapture';
 import { usePaymentStatus } from './usePaymentStatus';
+import { useFullReport } from './useFullReport';
+import { DevtoolsNotice } from './DevtoolsNotice';
 
-export function ReportView({ report }: { report: Report }) {
+export function ReportView({
+  report,
+  session,
+  sessionReady,
+}: {
+  report: Report;
+  session: QuizSession;
+  sessionReady: boolean;
+}) {
   const paid = usePaymentStatus();
+  const fullState = useFullReport(paid && sessionReady, session);
   const pointCount = report.strengths.length + report.tensions.length;
+  const birthSign = report.personalized_echo.find((entry) => entry.label === 'Seu signo')?.answer;
   const presenteCard = report.spread.find((entry) => entry.position === 'presente');
   const futuroCard = report.spread.find((entry) => entry.position === 'futuro');
 
   return (
     <article className="mx-auto max-w-2xl px-6 py-16 md:px-0">
+      <DevtoolsNotice paid={paid} />
       <div className="flex items-center gap-4">
         <GenieAvatar mood={report.genie_intro.mood} size="sm" priority />
         <p className="font-display text-lg leading-snug text-parchment-100">{report.genie_intro.line}</p>
@@ -33,7 +46,10 @@ export function ReportView({ report }: { report: Report }) {
       <h1 className="mt-3 font-display text-3xl leading-tight text-parchment-100 md:text-4xl">{report.title}</h1>
       <p className="mt-6 text-lg leading-relaxed text-parchment-400">{report.opening}</p>
 
-      {!paid && <PersonalEcho entries={report.personalized_echo} name={report.reader_name} />}
+      {/* Renders paid as well as unpaid. It used to be gated behind `!paid`,
+          so the proof that the reading was built from this reader's own answers
+          vanished at the exact moment they paid for it. */}
+      <PersonalEcho entries={report.personalized_echo} name={report.reader_name} paid={paid} />
 
       <CardSpread spread={report.spread} paid={paid} />
 
@@ -43,12 +59,26 @@ export function ReportView({ report }: { report: Report }) {
 
       {paid ? (
         <div className="mt-4">
-          <UnlockedSection title="Seu momento atual" content={report.current_moment} />
-          <UnlockedSection title="Próximos meses" content={report.full.months_ahead} />
-          <UnlockedSection title="Amor e relacionamentos" content={report.full.love} />
-          <UnlockedSection title="Carreira e dinheiro" content={report.full.career_money} />
-          <UnlockedSection title="O que merece sua atenção" content={report.full.attention} />
-          <UnlockedSection title="Possível ponto de alerta" content={report.full.warning} />
+          {fullState.status === 'ready' ? (
+            <>
+              <UnlockedSection title="Suas palavras" content={fullState.full.your_words} />
+              <UnlockedSection title="Seu momento atual" content={report.current_moment} />
+              <PointsSection strengths={report.strengths} tensions={report.tensions} />
+              {fullState.full.birth_reading && (
+                <UnlockedSection
+                  title="O que sua data de nascimento revela"
+                  content={fullState.full.birth_reading}
+                />
+              )}
+              <UnlockedSection title="Próximos meses" content={fullState.full.months_ahead} />
+              <UnlockedSection title="Amor e relacionamentos" content={fullState.full.love} />
+              <UnlockedSection title="Carreira e dinheiro" content={fullState.full.career_money} />
+              <UnlockedSection title="O que merece sua atenção" content={fullState.full.attention} />
+              <UnlockedSection title="Possível ponto de alerta" content={fullState.full.warning} />
+            </>
+          ) : (
+            <FullReportPlaceholder failed={fullState.status === 'error'} />
+          )}
           <UnlockedSection
             title={report.sections[0]?.title ?? 'O que seu elemento revela'}
             content={report.sections[0]?.content ?? ''}
@@ -65,7 +95,9 @@ export function ReportView({ report }: { report: Report }) {
               content={futuroCard.reading}
             />
           )}
-          <UnlockedSection title="Mensagem final" content={report.full.final_message} />
+          {fullState.status === 'ready' && (
+            <UnlockedSection title="Mensagem final" content={fullState.full.final_message} />
+          )}
         </div>
       ) : (
         <>
@@ -77,6 +109,10 @@ export function ReportView({ report }: { report: Report }) {
               every section, these titles just group them. */}
           <div className="mt-4 divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10 bg-ink-900 shadow-panel">
             <LockedSection title="Pontos fortes e pontos de atenção" hint={`${pointCount} pontos identificados`} />
+            <LockedSection
+              title="O que sua data de nascimento revela"
+              hint={birthSign ? `Sua leitura de ${birthSign} e o seu número` : undefined}
+            />
             <LockedSection title="Próximos meses" />
             <LockedSection title="Amor e relacionamentos" />
             <LockedSection title="Carreira e dinheiro" />
@@ -158,5 +194,76 @@ function UnlockedSection({ title, content }: { title: string; content: string })
       <h2 className="font-display text-xl text-parchment-100">{title}</h2>
       <p className="mt-2 leading-relaxed text-parchment-400">{content}</p>
     </motion.section>
+  );
+}
+
+// The paid sections arrive over the network now, so there is a real gap between
+// "payment confirmed" and "text on screen". Showing the reader that their
+// reading is being assembled beats an empty page or a spinner with no promise.
+function FullReportPlaceholder({ failed }: { failed: boolean }) {
+  if (failed) {
+    return (
+      <div className="mt-4 rounded-2xl border border-white/10 bg-ink-900 p-6">
+        <p className="font-display text-base text-parchment-100">Sua leitura já está paga e guardada.</p>
+        <p className="mt-2 text-sm leading-relaxed text-parchment-400">
+          Não conseguimos carregar as seções completas agora. Atualize a página em alguns instantes — seu
+          acesso continua liberado.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 rounded-2xl border border-white/10 bg-ink-900 p-6">
+      <p className="font-display text-base text-parchment-100">Montando sua leitura completa...</p>
+      <div className="mt-4 flex flex-col gap-2" aria-hidden>
+        {[100, 92, 78].map((width, index) => (
+          <div
+            key={index}
+            className="h-2 animate-pulse rounded-full bg-white/10"
+            style={{ width: `${width}%`, animationDelay: `${index * 120}ms` }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// The locked list promises "{n} pontos identificados" and the paid report never
+// showed them — the reader paid and the points they were told about were
+// nowhere on the page.
+function PointsSection({ strengths, tensions }: { strengths: string[]; tensions: string[] }) {
+  if (strengths.length === 0 && tensions.length === 0) return null;
+
+  return (
+    <section className="mt-4 rounded-2xl border border-white/10 bg-ink-900 p-6">
+      <h2 className="font-display text-lg leading-snug text-parchment-100">
+        Pontos fortes e pontos de atenção
+      </h2>
+      {strengths.length > 0 && (
+        <>
+          <p className="mt-4 font-display text-xs uppercase tracking-[0.16em] text-gold-400">A seu favor</p>
+          <ul className="mt-2 flex flex-col gap-2">
+            {strengths.map((item) => (
+              <li key={item} className="text-sm leading-relaxed text-parchment-400">
+                {item}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      {tensions.length > 0 && (
+        <>
+          <p className="mt-5 font-display text-xs uppercase tracking-[0.16em] text-gold-400">Merece atenção</p>
+          <ul className="mt-2 flex flex-col gap-2">
+            {tensions.map((item) => (
+              <li key={item} className="text-sm leading-relaxed text-parchment-400">
+                {item}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </section>
   );
 }

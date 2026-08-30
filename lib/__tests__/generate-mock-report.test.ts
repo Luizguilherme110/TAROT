@@ -70,15 +70,21 @@ describe('personalized_echo', () => {
     });
   });
 
-  it('omits anchor questions the reader never answered', () => {
-    const report = generateMockReport(makeSession({ answers: { situacao_atual: 'amor' } }));
+  it('omits questions the reader never answered', () => {
+    // birthDate cleared so the appended sign row does not stand in for an answer.
+    const report = generateMockReport(makeSession({ answers: { situacao_atual: 'amor' }, birthDate: '' }));
     expect(report.personalized_echo).toHaveLength(1);
     expect(report.personalized_echo[0].label).toBe('Seu momento');
   });
 
   it('is empty rather than throwing when nothing was answered', () => {
-    const report = generateMockReport(makeSession({ answers: {} }));
+    const report = generateMockReport(makeSession({ answers: {}, birthDate: '' }));
     expect(report.personalized_echo).toEqual([]);
+  });
+
+  it('still echoes the sign when the reader answered nothing but gave a birth date', () => {
+    const report = generateMockReport(makeSession({ answers: {}, birthDate: '1994-07-30' }));
+    expect(report.personalized_echo).toEqual([{ label: 'Seu signo', answer: 'Leão' }]);
   });
 
   it('never echoes a raw answer id, only the human label', () => {

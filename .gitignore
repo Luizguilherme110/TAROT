@@ -10,3 +10,7 @@ test-results/
 
 .vercel
 .env*
+
+# Exports do painel admin: contem e-mail de cliente e texto pessoal.
+# Nunca versionar.
+tarot-respostas-*.csv

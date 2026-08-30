@@ -31,6 +31,7 @@ export const GENIE_REACTIONS: Record<string, Record<string, GenieLine>> = {
   peso_relacoes: {
     medo_abrir: { mood: 'warm', line: 'Um medo de se abrir de novo. Faz sentido, depois de tudo.' },
     dar_mais: { mood: 'thinking', line: 'Você dá mais do que recebe, e sente esse desequilíbrio.' },
+    esperando_volta: { mood: 'warm', line: 'Esperando a resposta de alguém que se afastou. Eu senti esse peso.' },
     falta_algo: { mood: 'neutral', line: 'Tudo certo por fora, mas falta uma peça. Eu notei.' },
     sozinho: { mood: 'pleased', line: 'Sozinho(a) agora, e ainda assim em paz. Isso é raro.' },
   },
