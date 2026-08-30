@@ -8,6 +8,7 @@ import {
   getChoiceBreakdown,
 } from '@/lib/admin-metrics';
 import { LogoutButton } from '@/components/admin/LogoutButton';
+import { TestSessionButtons } from '@/components/admin/TestSessionButtons';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,7 +44,9 @@ export default async function AdminPage() {
         </div>
       </div>
 
-      <section className="mx-auto mt-10 max-w-4xl">
+      <TestSessionButtons />
+
+      <section className="mx-auto mt-12 max-w-4xl">
         <h2 className="font-display text-sm uppercase tracking-[0.18em] text-gold-400">Funil</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {funnelWithPayments.map((step, index) => {

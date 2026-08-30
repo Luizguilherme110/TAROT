@@ -1,6 +1,18 @@
 import { getSupabaseServiceClient } from '@/lib/supabase/server';
 import { getQuestionById, getAnswerLabel, QUIZ_QUESTION_POOL } from '@/lib/quiz-questions';
 
+/**
+ * Payments written by the admin test button carry this order-id prefix and zero
+ * cents. Every query that counts money or sales filters them out — a few
+ * minutes of testing must never show up as revenue on this dashboard.
+ */
+export const TEST_ORDER_PREFIX = 'TEST-';
+
+// Supabase treats these as "order id is null OR does not start with TEST-";
+// a plain .not.like() would also drop real rows whose order id is still null,
+// which is every payment between checkout and the webhook landing.
+const NOT_A_TEST = `cakto_order_id.is.null,cakto_order_id.not.like.${TEST_ORDER_PREFIX}%`;
+
 const FUNNEL_STEPS = [
   { event: 'landing_view', label: 'Visitou a landing' },
   { event: 'quiz_step_view', label: 'Entrou no quiz' },
@@ -50,6 +62,7 @@ export async function getRecentPayments(): Promise<PaymentRow[]> {
     .from('payments')
     .select('session_id, amount_cents, cakto_order_id, paid_at')
     .eq('status', 'paid')
+    .or(NOT_A_TEST)
     .order('paid_at', { ascending: false })
     .limit(50);
   if (error || !data) return [];
@@ -61,7 +74,8 @@ export async function getPaidCount(): Promise<number> {
   const { count, error } = await supabase
     .from('payments')
     .select('session_id', { count: 'exact', head: true })
-    .eq('status', 'paid');
+    .eq('status', 'paid')
+    .or(NOT_A_TEST);
   if (error) return 0;
   return count ?? 0;
 }
@@ -173,7 +187,7 @@ export async function getSessionExport(): Promise<SessionExport> {
       .select('session_id, question_id, answer, created_at')
       .order('created_at', { ascending: false })
       .limit(10000),
-    supabase.from('payments').select('session_id').eq('status', 'paid'),
+    supabase.from('payments').select('session_id').eq('status', 'paid').or(NOT_A_TEST),
     supabase.from('leads').select('session_id, email'),
   ]);
 
